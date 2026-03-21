@@ -101,9 +101,17 @@ class MemeCapDataset:
         missing_examples: List[str] = []
 
         for idx, item in enumerate(raw_samples):
-            img_fname = first_nonempty_string(item.get("img_fname"))
-            title = first_nonempty_string(item.get("title"))
-            caption = first_nonempty_string(item.get("meme_captions"))
+            # Handle both "img_fname" and "img" keys
+            img_fname = first_nonempty_string(item.get("img_fname") or item.get("img"))
+            
+            # Handle title (may be missing)
+            title = first_nonempty_string(item.get("title", ""))
+            
+            # Handle both "meme_captions" (list) and "caption" (string)
+            caption = first_nonempty_string(
+                item.get("meme_captions") or item.get("caption")
+            )
+            
             post_id = str(item.get("post_id", idx))
 
             if not img_fname or not caption:
