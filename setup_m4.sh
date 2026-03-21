@@ -53,7 +53,7 @@ echo -e "${GREEN}✅ OpenCLIP installed${NC}\n"
 
 # [7/8] Install other dependencies
 echo -e "${YELLOW}[7/8] Installing Transformers, Pillow, and utilities...${NC}"
-pip install transformers pillow tqdm numpy --quiet
+pip install transformers pillow tqdm numpy peft --quiet
 echo -e "${GREEN}✅ All dependencies installed${NC}\n"
 
 # [8/8] Test dependencies
