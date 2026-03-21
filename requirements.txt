@@ -1,0 +1,10 @@
+torch
+torchvision
+torchaudio
+transformers
+peft
+open_clip_torch
+pillow
+tqdm
+numpy
+matplotlib
