@@ -9,7 +9,7 @@ from zero_shot.openclip_backend import OpenCLIPBackend
 
 class LoRAOpenCLIPBackend(OpenCLIPBackend):
     def __init__(self, model_name, pretrained, checkpoint_path, device):
-        # 1. Initialize the Base OpenCLIP model using friends' code
+        # 1. Initialize the Base OpenCLIP model
         super().__init__(model_name, pretrained, device)
         
         print(f"⚡ Loading LoRA Adapter from: {checkpoint_path}")
