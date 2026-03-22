@@ -45,7 +45,9 @@ def train(args):
     run_dir = os.path.join(args.output_dir, timestamp)
     os.makedirs(run_dir, exist_ok=True)
     
+    # --- RESTORED LOGGING FILES ---
     log_file = os.path.join(run_dir, "training_log.txt")
+    plot_file = os.path.join(run_dir, "loss_plot.png")
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"🚀 Training on {device} (OpenCLIP Native)")
@@ -104,6 +106,9 @@ def train(args):
     # Loss Functions
     loss_img = nn.CrossEntropyLoss()
     loss_txt = nn.CrossEntropyLoss()
+    
+    # --- RESTORED HISTORY TRACKING ---
+    loss_history = []
 
     print(f"📉 Batch Size: {args.batch_size}")
 
@@ -142,7 +147,14 @@ def train(args):
             progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
             
         avg_loss = total_loss / len(dataloader)
+        
+        # --- RESTORED LOGGING CALLS ---
+        loss_history.append(avg_loss)
         print(f"Epoch {epoch} Average Loss: {avg_loss:.4f}")
+        
+        # Save to TXT and PNG
+        utils.log_metrics(log_file, epoch, avg_loss)
+        utils.plot_loss(loss_history, plot_file)
         
         # Save Adapter Checkpoint
         save_path = os.path.join(run_dir, f"lora_epoch_{epoch}")
@@ -154,7 +166,7 @@ if __name__ == "__main__":
     parser.add_argument("--train_json", type=str, default="data/memes-trainval.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
     parser.add_argument("--output_dir", type=str, default="outputs/finetune")
-    parser.add_argument("--batch_size", type=int, default=32) # Lowered default for safety
+    parser.add_argument("--batch_size", type=int, default=32) 
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--lora_r", type=int, default=16)
