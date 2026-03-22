@@ -54,6 +54,14 @@ project/
 
 ## 4. Task 2.1: Cross-Modal Retrieval
 
+## 2.1 Cross-Modal Retrieval
+
+In this task, we aim to retrieve the correct meme caption from a candidate pool given a query. We utilize a dual-encoder architecture where images and texts are projected into a shared latent space. We evaluate two input types:
+*   **Type 1 (Image Only):** The query is the visual embedding of the meme image.
+*   **Type 2 (Image + Title):** The query is a weighted fusion of the image embedding and the Reddit post title embedding ($\alpha \cdot \text{img} + (1-\alpha) \cdot \text{title}$).
+
+We employ **Recall@K (R@1, R@5)** and **Mean Reciprocal Rank (MRR)** as our primary evaluation metrics.
+
 ### Task Definition
 
 The goal is to retrieve the correct meme caption for a given meme query. The system leverages a shared latent space where the similarity between a meme and its correct caption is higher than the similarity between the meme and unrelated captions.
@@ -119,6 +127,61 @@ We evaluate pretrained cross-modal retrieval architectures in a zero-shot settin
 1. **OpenCLIP (ViT-L/14):** Used as the main zero-shot retrieval baseline. Selected for its strong open-source image-text retrieval capabilities and efficiency for full-gallery ranking.
 2. **SigLIP / SigLIP2:** Included as a strong alternative vision-language model family. Useful for comparison against standard CLIP-style contrastive training.
 3. **BLIP Retrieval / BLIP ITM:** Used specifically as a reranker for top candidates retrieved from faster dual-encoder models to improve final retrieval quality.
+
+
+
+### (d) Finetuning Pretrained Architectures (LoRA)
+
+To improve upon the zero-shot baseline, we fine-tuned the **OpenCLIP (ViT-L/14)** model using **Low-Rank Adaptation (LoRA)**. LoRA allows us to adapt the pre-trained weights efficiently by injecting trainable rank decomposition matrices into the Transformer layers, rather than retraining the entire massive parameter set.
+
+#### Implementation Details
+*   **Base Model:** `ViT-L-14` (pretrained on `laion2b_s32b_b82k`)
+*   **LoRA Config:** Rank ($r$) = 16, Alpha ($\alpha$) = 32, Target Modules = `["c_fc", "c_proj", "out_proj"]`.
+*   **Training:** We trained for 10 epochs using a contrastive loss function.
+*   **Loss Dynamics:** The model converged rapidly, with the training loss decreasing from **0.76** in Epoch 1 to **0.02** by Epoch 10.
+
+![Training Loss Plot](outputs/finetune/20260322_102324/loss_plot.png)
+*Figure: Training loss over 10 epochs showing rapid convergence.*
+
+#### Model Selection & Overfitting Analysis
+We monitored the validation performance (R@1 on the test set) at every epoch to select the optimal checkpoint. While the training loss continued to decrease until Epoch 10, the retrieval performance peaked at **Epoch 7** and subsequently degraded.
+
+*   **Epoch 7 (Peak):** Achieved **68.16% R@1** (Type 1).
+*   **Epoch 8-10 (Overfitting):** Performance dropped significantly (down to 60.72% by Epoch 10), indicating the model began memorizing training noise rather than generalizing.
+
+Consequently, we selected the **Epoch 7 checkpoint** for our final results.
+
+#### Comparative Results
+
+| Model | Input Type | R@1 | R@5 | MRR |
+| :--- | :--- | :--- | :--- | :--- |
+| **Zero-Shot Baseline** | Type 1 | 60.29 | 74.78 | 67.51 |
+| **Fine-Tuned (LoRA)** | **Type 1** | **68.16** | **79.96** | **73.66** |
+| | | | | |
+| **Zero-Shot Baseline** | Type 2 | 56.71 | 71.38 | 63.81 |
+| **Fine-Tuned (LoRA)** | Type 2 | 57.42 | 72.09 | 64.50 |
+
+*Note: The fine-tuning was performed on image-caption pairs. As expected, the most significant gains (+7.87% R@1) were observed in Type 1 (Image Only) retrieval.*
+
+#### Project Structure & Checkpoints
+The training artifacts are organized by timestamp. The selected run (`20260322_102324`) contains the logs, loss plot, and saved adapters for all 10 epochs.
+
+```text
+outputs/finetune
+└── 20260322_102324
+    ├── lora_epoch_1
+    ├── lora_epoch_2
+    ├── lora_epoch_3
+    ├── lora_epoch_4
+    ├── lora_epoch_5
+    ├── lora_epoch_6
+    ├── lora_epoch_7       <-- SELECTED CHECKPOINT
+    ├── lora_epoch_8
+    ├── lora_epoch_9
+    ├── lora_epoch_10
+    ├── loss_plot.png
+    └── training_log.txt
+```
 
 ---
 
