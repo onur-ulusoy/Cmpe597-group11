@@ -1,18 +1,44 @@
 import argparse
 import torch
+import torch.nn as nn
 import sys
 import os
 from datetime import datetime
 from torch.utils.data import DataLoader
-from transformers import CLIPProcessor, CLIPModel
+import open_clip 
 from peft import LoraConfig, get_peft_model
-from dataset import MemeCapTrainDataset
 from tqdm import tqdm
-import types
 
 # Add root directory to path
 sys.path.append(os.getcwd())
 import utils 
+from dataset import MemeCapTrainDataset
+
+# --- Adapter: Makes OpenCLIP look like Hugging Face for the Dataset ---
+class OpenClipAdapter:
+    def __init__(self, preprocess_fn, tokenizer):
+        self.preprocess = preprocess_fn
+        self.tokenizer = tokenizer
+
+    def __call__(self, images=None, text=None, return_tensors="pt", **kwargs):
+        data = {}
+        
+        # 1. Handle Images
+        if images is not None:
+            if isinstance(images, list):
+                pixel_values = torch.stack([self.preprocess(img) for img in images])
+            else:
+                pixel_values = self.preprocess(images).unsqueeze(0)
+            data["pixel_values"] = pixel_values
+        
+        # 2. Handle Text (Process this EVEN IF images are present)
+        if text is not None:
+            # OpenCLIP tokenizer returns tensors directly
+            input_ids = self.tokenizer(text)
+            data["input_ids"] = input_ids
+            data["attention_mask"] = torch.ones_like(input_ids)
+            
+        return data
 
 def train(args):
     # 1. Setup
@@ -24,69 +50,62 @@ def train(args):
     plot_file = os.path.join(run_dir, "loss_plot.png")
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"🚀 Training on {device} (Cloud Mode)")
+    print(f"🚀 Training on {device} (OpenCLIP Native)")
 
-    # 2. Load Large Model
-    model_id = "laion/CLIP-ViT-L-14-laion2B-s32B-b82K"
-    print(f"🏗️ Loading Model: {model_id}")
+    # 2. Load Model (Matches friends' config)
+    model_name = "ViT-L-14"
+    pretrained = "laion2b_s32b_b82k"
+    print(f"🏗️ Loading: {model_name} ({pretrained})")
     
-    processor = CLIPProcessor.from_pretrained(model_id)
-    model = CLIPModel.from_pretrained(model_id)
+    model, _, preprocess = open_clip.create_model_and_transforms(
+        model_name, 
+        pretrained=pretrained,
+        device=device
+    )
+    tokenizer = open_clip.get_tokenizer(model_name)
+    processor = OpenClipAdapter(preprocess, tokenizer)
 
-    # --- PATCH: Fix for PEFT compatibility ---
-    def get_input_embeddings(self):
-        return self.text_model.embeddings.token_embedding
-    model.get_input_embeddings = types.MethodType(get_input_embeddings, model)
-
-    def make_inputs_require_grad(module, input, output):
-        output.requires_grad_(True)
-    model.vision_model.embeddings.patch_embedding.register_forward_hook(make_inputs_require_grad)
-    model.text_model.embeddings.token_embedding.register_forward_hook(make_inputs_require_grad)
-
-    # Enable Gradient Checkpointing (Optional on Cloud if you have >24GB VRAM, but safe to keep)
-    model.gradient_checkpointing_enable()
-    model.config.use_cache = False 
-
-    # 3. Aggressive LoRA Configuration
-    # We target ALL linear layers now, not just Attention.
+    # 3. Apply LoRA
     config = LoraConfig(
-        r=64,               # Increased from 16 to 64 (More capacity)
-        lora_alpha=128,     # Alpha usually 2x Rank
-        target_modules=[
-            "q_proj", "v_proj", "k_proj", "out_proj", # Attention
-            "fc1", "fc2"                              # MLP Layers (Crucial for knowledge)
-        ], 
+        r=64,
+        lora_alpha=128,
+        target_modules=["c_fc", "c_proj", "out_proj"], 
         lora_dropout=0.05,
         bias="none"
     )
     
+    # Freeze base model
+    for param in model.parameters():
+        param.requires_grad = False 
+        
     model = get_peft_model(model, config)
-    print(f"🧠 Trainable Parameters:")
     model.print_trainable_parameters()
     model.to(device)
     model.train()
 
-    # 4. Data Loader (Optimized for Speed)
+    # 4. Data Loader
     dataset = MemeCapTrainDataset(
         json_path=args.train_json,
         image_root=args.image_root,
         processor=processor
     )
     
-    # num_workers=4 is standard for Cloud GPUs
     dataloader = DataLoader(
         dataset, 
         batch_size=args.batch_size, 
         shuffle=True, 
-        num_workers=4, 
-        pin_memory=True
+        num_workers=4,
+        pin_memory=True,
+        drop_last=True 
     )
 
-    # Increased LR slightly for LoRA
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     
+    # Contrastive Loss
+    loss_img = nn.CrossEntropyLoss()
+    loss_txt = nn.CrossEntropyLoss()
     loss_history = []
-    
+
     print(f"📉 Batch Size: {args.batch_size}")
 
     for epoch in range(1, args.epochs + 1):
@@ -96,26 +115,32 @@ def train(args):
         progress_bar = tqdm(dataloader, desc=f"Epoch {epoch}/{args.epochs}")
         
         for batch in progress_bar:
-            pixel_values = batch["pixel_values"].to(device)
-            input_ids = batch["input_ids"].to(device)
-            attention_mask = batch["attention_mask"].to(device)
+            images = batch["pixel_values"].to(device)
+            texts = batch["input_ids"].to(device)
             
-            outputs = model(
-                input_ids=input_ids, 
-                attention_mask=attention_mask, 
-                pixel_values=pixel_values,
-                return_loss=True 
-            )
+            # Forward pass
+            image_features, text_features, logit_scale = model(images, texts)
             
-            loss = outputs.loss
+            # Normalize
+            image_features = image_features / image_features.norm(dim=1, keepdim=True)
+            text_features = text_features / text_features.norm(dim=1, keepdim=True)
+
+            # Calculate Logits
+            logits_per_image = logit_scale * image_features @ text_features.t()
+            logits_per_text = logits_per_image.t()
+
+            # Labels
+            labels = torch.arange(len(images), device=device, dtype=torch.long)
+
+            # Loss
+            loss = (loss_img(logits_per_image, labels) + loss_txt(logits_per_text, labels)) / 2
+            
             loss.backward()
-            
             optimizer.step()
             optimizer.zero_grad()
             
-            current_loss = loss.item()
-            total_loss += current_loss
-            progress_bar.set_postfix({"loss": f"{current_loss:.4f}"})
+            total_loss += loss.item()
+            progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
             
         avg_loss = total_loss / len(dataloader)
         loss_history.append(avg_loss)
@@ -125,7 +150,7 @@ def train(args):
         utils.log_metrics(log_file, epoch, avg_loss)
         utils.plot_loss(loss_history, plot_file)
         
-        # Save every epoch
+        # Save Adapter
         save_path = os.path.join(run_dir, f"lora_epoch_{epoch}")
         model.save_pretrained(save_path)
         print(f"✅ Saved adapter to {save_path}\n")
@@ -135,11 +160,8 @@ if __name__ == "__main__":
     parser.add_argument("--train_json", type=str, default="data/memes-trainval.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
     parser.add_argument("--output_dir", type=str, default="outputs/finetune")
-    
-    # CLOUD SETTINGS
-    parser.add_argument("--batch_size", type=int, default=64) # Try 64 or 128!
-    parser.add_argument("--epochs", type=int, default=10)     # Train longer
-    parser.add_argument("--lr", type=float, default=5e-5)     # Higher LR for LoRA
-    
+    parser.add_argument("--batch_size", type=int, default=128) 
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--lr", type=float, default=1e-4)
     args = parser.parse_args()
     train(args)
