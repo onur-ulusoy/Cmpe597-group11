@@ -2,29 +2,20 @@ import argparse
 import torch
 import sys
 import os
-import gc
-import types
 from datetime import datetime
 from torch.utils.data import DataLoader
 from transformers import CLIPProcessor, CLIPModel
 from peft import LoraConfig, get_peft_model
 from dataset import MemeCapTrainDataset
 from tqdm import tqdm
+import types
 
-# Add root directory to path so we can import utils
+# Add root directory to path
 sys.path.append(os.getcwd())
 import utils 
 
-def get_device():
-    if torch.cuda.is_available():
-        return "cuda"
-    elif torch.backends.mps.is_available():
-        return "mps"
-    else:
-        return "cpu"
-
 def train(args):
-    # 1. Setup Directories
+    # 1. Setup
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = os.path.join(args.output_dir, timestamp)
     os.makedirs(run_dir, exist_ok=True)
@@ -32,71 +23,71 @@ def train(args):
     log_file = os.path.join(run_dir, "training_log.txt")
     plot_file = os.path.join(run_dir, "loss_plot.png")
     
-    print(f"📂 Experiment Output Directory: {run_dir}")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"🚀 Training on {device} (Cloud Mode)")
 
-    device = get_device()
-    print(f"🚀 Training on {device}...")
-
-    # 2. Load the LARGE Model (ViT-L)
+    # 2. Load Large Model
     model_id = "laion/CLIP-ViT-L-14-laion2B-s32B-b82K"
     print(f"🏗️ Loading Model: {model_id}")
     
     processor = CLIPProcessor.from_pretrained(model_id)
     model = CLIPModel.from_pretrained(model_id)
 
-    # --- 🔧 PATCH: Fix for 'NotImplementedError: get_input_embeddings' ---
-    # PEFT needs this method to exist to enable gradient checkpointing.
-    # We point it to the text embeddings to satisfy the check.
+    # --- PATCH: Fix for PEFT compatibility ---
     def get_input_embeddings(self):
         return self.text_model.embeddings.token_embedding
-
     model.get_input_embeddings = types.MethodType(get_input_embeddings, model)
 
-    # --- 🔧 PATCH: Ensure Gradients Flow for Checkpointing ---
-    # Gradient Checkpointing cuts the graph, so we must force inputs to require grad.
-    # We do this for BOTH Vision and Text encoders.
     def make_inputs_require_grad(module, input, output):
         output.requires_grad_(True)
-
     model.vision_model.embeddings.patch_embedding.register_forward_hook(make_inputs_require_grad)
     model.text_model.embeddings.token_embedding.register_forward_hook(make_inputs_require_grad)
 
-    # Enable Gradient Checkpointing
+    # Enable Gradient Checkpointing (Optional on Cloud if you have >24GB VRAM, but safe to keep)
     model.gradient_checkpointing_enable()
     model.config.use_cache = False 
 
-    # 3. Apply LoRA
+    # 3. Aggressive LoRA Configuration
+    # We target ALL linear layers now, not just Attention.
     config = LoraConfig(
-        r=16,              
-        lora_alpha=32,     
-        target_modules=["q_proj", "v_proj"], 
+        r=64,               # Increased from 16 to 64 (More capacity)
+        lora_alpha=128,     # Alpha usually 2x Rank
+        target_modules=[
+            "q_proj", "v_proj", "k_proj", "out_proj", # Attention
+            "fc1", "fc2"                              # MLP Layers (Crucial for knowledge)
+        ], 
         lora_dropout=0.05,
         bias="none"
     )
     
     model = get_peft_model(model, config)
+    print(f"🧠 Trainable Parameters:")
     model.print_trainable_parameters()
     model.to(device)
     model.train()
 
-    # 4. Data Loader
+    # 4. Data Loader (Optimized for Speed)
     dataset = MemeCapTrainDataset(
         json_path=args.train_json,
         image_root=args.image_root,
         processor=processor
     )
     
-    # num_workers=0 is required for Mac MPS stability
-    dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=0)
+    # num_workers=4 is standard for Cloud GPUs
+    dataloader = DataLoader(
+        dataset, 
+        batch_size=args.batch_size, 
+        shuffle=True, 
+        num_workers=4, 
+        pin_memory=True
+    )
 
+    # Increased LR slightly for LoRA
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     
-    # 5. Training Loop with Gradient Accumulation
     loss_history = []
-    accumulation_steps = args.grad_accum_steps
     
-    print(f"📉 Batch Size: {args.batch_size} | Accumulation Steps: {accumulation_steps}")
-    print(f"🔄 Effective Batch Size: {args.batch_size * accumulation_steps}")
+    print(f"📉 Batch Size: {args.batch_size}")
 
     for epoch in range(1, args.epochs + 1):
         total_loss = 0
@@ -104,12 +95,11 @@ def train(args):
         
         progress_bar = tqdm(dataloader, desc=f"Epoch {epoch}/{args.epochs}")
         
-        for i, batch in enumerate(progress_bar):
+        for batch in progress_bar:
             pixel_values = batch["pixel_values"].to(device)
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             
-            # Forward pass
             outputs = model(
                 input_ids=input_ids, 
                 attention_mask=attention_mask, 
@@ -117,37 +107,25 @@ def train(args):
                 return_loss=True 
             )
             
-            loss = outputs.loss / accumulation_steps
+            loss = outputs.loss
             loss.backward()
             
-            # Step optimizer only after accumulating enough gradients
-            if (i + 1) % accumulation_steps == 0:
-                optimizer.step()
-                optimizer.zero_grad()
+            optimizer.step()
+            optimizer.zero_grad()
             
-            # Record raw loss
-            current_loss = loss.item() * accumulation_steps
+            current_loss = loss.item()
             total_loss += current_loss
             progress_bar.set_postfix({"loss": f"{current_loss:.4f}"})
             
-            # Memory Cleanup for MPS
-            del pixel_values, input_ids, attention_mask, outputs, loss
-            if i % 50 == 0:
-                gc.collect()
-                if device == "mps":
-                    torch.mps.empty_cache()
-            
-        # End of Epoch Stats
         avg_loss = total_loss / len(dataloader)
         loss_history.append(avg_loss)
         
         print(f"Epoch {epoch} Average Loss: {avg_loss:.4f}")
         
-        # --- Save Logs & Plot ---
         utils.log_metrics(log_file, epoch, avg_loss)
         utils.plot_loss(loss_history, plot_file)
         
-        # --- Save Checkpoint ---
+        # Save every epoch
         save_path = os.path.join(run_dir, f"lora_epoch_{epoch}")
         model.save_pretrained(save_path)
         print(f"✅ Saved adapter to {save_path}\n")
@@ -158,11 +136,10 @@ if __name__ == "__main__":
     parser.add_argument("--image_root", type=str, default="data/memes")
     parser.add_argument("--output_dir", type=str, default="outputs/finetune")
     
-    # Keep batch size small for ViT-L on Mac
-    parser.add_argument("--batch_size", type=int, default=32) 
-    parser.add_argument("--grad_accum_steps", type=int, default=8)
-    parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--lr", type=float, default=1e-5) 
-    args = parser.parse_args()
+    # CLOUD SETTINGS
+    parser.add_argument("--batch_size", type=int, default=64) # Try 64 or 128!
+    parser.add_argument("--epochs", type=int, default=10)     # Train longer
+    parser.add_argument("--lr", type=float, default=5e-5)     # Higher LR for LoRA
     
+    args = parser.parse_args()
     train(args)
