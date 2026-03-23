@@ -2,11 +2,9 @@ from pathlib import Path
 from typing import Sequence
 
 import torch
+import torch.nn.functional as F
 from PIL import Image
 from tqdm import tqdm
-
-from common import l2_normalize
-
 
 class OpenCLIPBackend:
     def __init__(self, model_name: str, pretrained: str, device: str):
@@ -29,7 +27,7 @@ class OpenCLIPBackend:
             images = [self.preprocess(Image.open(p).convert("RGB")) for p in batch_paths]
             batch = torch.stack(images).to(self.device)
             feats = self.model.encode_image(batch)
-            feats = l2_normalize(feats)
+            feats = F.normalize(feats, p=2, dim=-1)
             all_feats.append(feats.cpu())
         return torch.cat(all_feats, dim=0)
 
@@ -40,6 +38,6 @@ class OpenCLIPBackend:
             batch_texts = list(texts[start:start + batch_size])
             tokens = self.tokenizer(batch_texts).to(self.device)
             feats = self.model.encode_text(tokens)
-            feats = l2_normalize(feats)
+            feats = F.normalize(feats, p=2, dim=-1)
             all_feats.append(feats.cpu())
         return torch.cat(all_feats, dim=0)

@@ -32,7 +32,6 @@ def total_loss(
     logit_scale,
     label_smoothing: float = 0.0,
 ):
-    # Wrapper kept to maintain output dictionary format for your logging
     loss = symmetric_contrastive_loss(
         image_emb=image_emb,
         text_emb=text_emb,

@@ -16,15 +16,7 @@ class BLIPReranker:
         self.model.eval()
 
     def _extract_matching_score(self, outputs) -> torch.Tensor:
-        """
-        BLIP image-text retrieval returns a BlipImageTextMatchingModelOutput
-        whose relevant field is usually `itm_score`.
-
-        We convert it to a 1D score per pair:
-        - if shape [B, 2], use P(match) = softmax[:, 1]
-        - if shape [B, 1], use that single score
-        - if another tensor-like format appears, flatten carefully
-        """
+        # Use the image-text matching head for reranking.
         if hasattr(outputs, "itm_score") and outputs.itm_score is not None:
             score = outputs.itm_score
 

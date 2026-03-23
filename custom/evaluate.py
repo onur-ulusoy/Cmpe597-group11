@@ -1,18 +1,20 @@
 import argparse
 import os
+import sys
+sys.path.append(os.getcwd())
 
 import torch
 from torch.utils.data import DataLoader
 
-from dataset import MemeCapCustomDataset, Vocab, build_image_transform, load_memecap_records
+from dataset import load_memecap_records
+from utils import save_json, load_checkpoint
+from metrics import compute_recall_metrics
+from custom_dataset import MemeCapCustomDataset, Vocab, build_image_transform
 from model import MatchingModel
-from utils import compute_recall_at_k, load_checkpoint, save_json
 
 def get_device():
-    if torch.cuda.is_available():
-        return "cuda"
-    elif torch.backends.mps.is_available():
-        return "mps"
+    if torch.cuda.is_available(): return "cuda"
+    elif torch.backends.mps.is_available(): return "mps"
     return "cpu"
 
 @torch.no_grad()
@@ -45,7 +47,7 @@ def evaluate_matching(model, dataloader, device):
     caption_embs = caption_embs.to(device)
 
     score_matrix = meme_embs @ caption_embs.T
-    return compute_recall_at_k(score_matrix.cpu(), ks=(1, 5, 10))
+    return compute_recall_metrics(score_matrix.cpu(), ks=(1, 5, 10))
 
 def main(args):
     device = get_device()
@@ -54,7 +56,6 @@ def main(args):
     vocab = Vocab(checkpoint["vocab_stoi"])
     model_args = checkpoint["args"]
     
-    # Automatically extract the model_type used during training
     model_type = model_args.get("model_type", "type1")
     print(f"[Info] Loaded a {model_type.upper()} checkpoint.")
 
@@ -95,7 +96,6 @@ def main(args):
         print(f"{k}: {v}")
 
     if args.output_json:
-        # Save dynamically based on model type
         out_dir = os.path.dirname(args.output_json)
         os.makedirs(out_dir, exist_ok=True)
         final_out_path = os.path.join(out_dir, f"{model_type}_test_metrics.json")

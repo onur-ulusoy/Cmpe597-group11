@@ -1,21 +1,20 @@
 import argparse
+import sys
+import os
 from pathlib import Path
 
 import torch
+import torch.nn.functional as F
 
-from common import (
-    MemeCapDataset,
-    compute_metrics,
-    l2_normalize,
-    make_query_embeddings,
-    print_metrics,
-    save_json,
-    set_seed,
-)
+sys.path.append(os.getcwd())
+
+from dataset import load_memecap_records
+from metrics import compute_recall_metrics, print_metrics
+from utils import save_json, set_seed
+
 from openclip_backend import OpenCLIPBackend
 from siglip_backend import SigLIPBackend
 from blip_reranker import BLIPReranker
-
 
 def build_backend(args):
     if args.model_family == "openclip":
@@ -31,7 +30,6 @@ def build_backend(args):
         )
     raise ValueError(f"Unsupported model_family: {args.model_family}")
 
-
 def make_run_name(args) -> str:
     base = f"{args.model_family}_{args.input_type}"
     if args.input_type == "type2":
@@ -39,24 +37,38 @@ def make_run_name(args) -> str:
         return f"{base}_{alpha_tag}"
     return base
 
+def make_query_embeddings(image_emb, title_emb, input_type, alpha):
+    image_emb = F.normalize(image_emb, p=2, dim=-1)
+    
+    if input_type == "type1":
+        return image_emb
+
+    if input_type == "type2":
+        if title_emb is None:
+            raise ValueError("title_emb required for type2")
+        title_emb = F.normalize(title_emb, p=2, dim=-1)
+        fused = alpha * image_emb + (1.0 - alpha) * title_emb
+        return F.normalize(fused, p=2, dim=-1)
+
+    raise ValueError(f"Unknown input_type: {input_type}")
 
 def run(args):
     set_seed(args.seed)
 
-    dataset = MemeCapDataset.from_paths(
-        data_dir=args.data_dir,
-        test_json=args.test_json,
-        image_root=args.image_root,
-        limit=args.limit,
+    # Load dataloader
+    records = load_memecap_records(
+        json_path=args.test_json, 
+        image_root=args.image_root, 
+        limit=args.limit
     )
 
     print(f"Using device: {args.device}")
-    print(f"Test JSON: {dataset.json_path}")
 
-    image_paths = [s.image_path for s in dataset.samples]
-    titles = [s.title for s in dataset.samples]
-    captions = [s.caption for s in dataset.samples]
+    image_paths = [s.image_path for s in records]
+    titles = [s.title for s in records]
+    captions = [s.caption for s in records]
 
+    # Extract Embeddings
     backend = build_backend(args)
 
     image_emb = backend.encode_images(image_paths, batch_size=args.batch_size)
@@ -72,12 +84,14 @@ def run(args):
         input_type=args.input_type,
         alpha=args.alpha,
     )
-    caption_emb = l2_normalize(caption_emb)
+    caption_emb = F.normalize(caption_emb, p=2, dim=-1)
 
+    # Calculate Scores & Metrics
     score_matrix = query_emb @ caption_emb.T
 
     run_name = make_run_name(args)
-    metrics = compute_metrics(score_matrix)
+    # Using the universal metrics math
+    metrics = compute_recall_metrics(score_matrix)
     print_metrics(run_name, metrics)
 
     output_dir = Path(args.output_dir)
@@ -90,14 +104,14 @@ def run(args):
             "model_family": args.model_family,
             "input_type": args.input_type,
             "alpha": args.alpha if args.input_type == "type2" else None,
-            "num_queries": len(dataset.samples),
-            "test_json": str(dataset.json_path),
-            "image_root": str(Path(args.image_root)),
+            "num_queries": len(records),
+            "test_json": args.test_json,
+            "image_root": args.image_root,
             "metrics": metrics,
-            "missing_image_examples": dataset.missing_examples[:20],
         },
     )
 
+    # BLIP Reranker Phase
     if args.use_blip_reranker:
         reranker = BLIPReranker(checkpoint=args.blip_checkpoint, device=args.device)
         reranked_matrix = reranker.rerank_topk(
@@ -110,7 +124,7 @@ def run(args):
         )
 
         rerank_name = f"{run_name}_blip_rerank"
-        rerank_metrics = compute_metrics(reranked_matrix)
+        rerank_metrics = compute_recall_metrics(reranked_matrix)
         print_metrics(rerank_name, rerank_metrics)
 
         save_json(
@@ -123,17 +137,15 @@ def run(args):
                 "blip_checkpoint": args.blip_checkpoint,
                 "blip_top_k": args.blip_top_k,
                 "blip_blend_lambda": args.blip_blend_lambda,
-                "num_queries": len(dataset.samples),
+                "num_queries": len(records),
                 "metrics": rerank_metrics,
             },
         )
 
-
 def build_parser():
     parser = argparse.ArgumentParser(description="Zero-shot meme caption retrieval evaluator")
 
-    parser.add_argument("--data_dir", type=str, default="data")
-    parser.add_argument("--test_json", type=str, default=None)
+    parser.add_argument("--test_json", type=str, default="data/memes-test.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
     parser.add_argument("--output_dir", type=str, default="outputs/zero_shot")
     parser.add_argument("--limit", type=int, default=None)
@@ -159,7 +171,6 @@ def build_parser():
     parser.add_argument("--blip_blend_lambda", type=float, default=0.5)
 
     return parser
-
 
 if __name__ == "__main__":
     args = build_parser().parse_args()

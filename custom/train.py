@@ -2,32 +2,23 @@ import argparse
 import math
 import os
 import random
+import sys
+sys.path.append(os.getcwd())
 
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from dataset import (
-    MemeCapCustomDataset,
-    build_image_transform,
-    build_vocab_from_records,
-    load_memecap_records,
-)
+from dataset import load_memecap_records
+from metrics import compute_recall_metrics
+from utils import set_seed, save_json, save_checkpoint
+from custom_dataset import MemeCapCustomDataset, build_image_transform, build_vocab_from_records
 from loss import total_loss
 from model import MatchingModel
-from utils import (
-    compute_recall_at_k,
-    load_checkpoint,
-    save_checkpoint,
-    save_json,
-    set_seed,
-)
 
 def get_device():
-    if torch.cuda.is_available():
-        return "cuda"
-    elif torch.backends.mps.is_available():
-        return "mps"
+    if torch.cuda.is_available(): return "cuda"
+    elif torch.backends.mps.is_available(): return "mps"
     return "cpu"
 
 def split_records(records, val_ratio=0.1, seed=42):
@@ -79,7 +70,7 @@ def evaluate_matching(model, dataloader, device):
     caption_embs = caption_embs.to(device)
     
     score_matrix = meme_embs @ caption_embs.T
-    metrics = compute_recall_at_k(score_matrix.cpu(), ks=(1, 5, 10))
+    metrics = compute_recall_metrics(score_matrix.cpu(), ks=(1, 5, 10))
     return metrics
 
 def train_one_epoch(
@@ -99,7 +90,6 @@ def train_one_epoch(
         optimizer.zero_grad(set_to_none=True)
 
         with torch.autocast(device_type=device, enabled=use_amp):
-            # The model handles whether it needs title_ids based on its model_type
             pos_out = model(images, title_ids, title_mask, caption_ids, caption_mask)
             
             loss, parts = total_loss(
@@ -127,7 +117,6 @@ def main(args):
     device = get_device()
     print(f"[Device] {device} | [Model Type] {args.model_type.upper()}")
 
-    # Setup specific output directory for the model type
     run_output_dir = os.path.join(args.output_dir, args.model_type)
     os.makedirs(run_output_dir, exist_ok=True)
 
@@ -207,7 +196,6 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # NEW ARGUMENT: Choose Type 1 or Type 2
     parser.add_argument("--model_type", type=str, choices=["type1", "type2"], default="type1", help="type1 (image only) or type2 (image + title)")
 
     parser.add_argument("--train_json", type=str, default="data/memes-trainval.json")
