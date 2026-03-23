@@ -1,0 +1,17 @@
+{
+  "run_name": "siglip_type1",
+  "model_family": "siglip",
+  "input_type": "type1",
+  "alpha": 0.7,
+  "num_queries": 559,
+  "test_json": "data\\memes-test.json",
+  "image_root": "data\\memes",
+  "metrics": {
+    "R@1": 0.5474060773849487,
+    "R@5": 0.7084078788757324,
+    "MRR": 0.6254181265830994,
+    "MedR": 1.0,
+    "MeanR": 27.044723510742188
+  },
+  "missing_image_examples": []
+}

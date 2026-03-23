@@ -1,0 +1,17 @@
+{
+  "run_name": "openclip_type2_blip_rerank",
+  "base_model_family": "openclip",
+  "input_type": "type2",
+  "alpha": 0.7,
+  "blip_checkpoint": "Salesforce/blip-itm-base-coco",
+  "blip_top_k": 50,
+  "blip_blend_lambda": 0.5,
+  "num_queries": 559,
+  "metrics": {
+    "R@1": 0.6815742254257202,
+    "R@5": 0.7889087796211243,
+    "MRR": 0.7316446900367737,
+    "MedR": 1.0,
+    "MeanR": 33.618961334228516
+  }
+}
