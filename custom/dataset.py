@@ -91,7 +91,6 @@ def build_image_transform(image_size: int = 224, train: bool = True):
     )
 
     if train:
-        # Improved augmentations: Random crop instead of static resize, no horizontal flip
         return transforms.Compose([
             transforms.RandomResizedCrop((image_size, image_size), scale=(0.8, 1.0)),
             transforms.ColorJitter(
@@ -183,14 +182,22 @@ class MemeCapCustomDataset(Dataset):
         image = Image.open(sample["image_path"]).convert("RGB")
         image = self.image_transform(image)
 
+        # Encode Caption
         caption_ids = self.vocab.encode(sample["caption"], self.max_text_len)
         caption_ids = torch.tensor(caption_ids, dtype=torch.long)
-        attention_mask = (caption_ids != self.vocab.pad_idx).long()
+        caption_mask = (caption_ids != self.vocab.pad_idx).long()
+
+        # Encode Title (Always generated, model decides whether to use it)
+        title_ids = self.vocab.encode(sample["title"], self.max_text_len)
+        title_ids = torch.tensor(title_ids, dtype=torch.long)
+        title_mask = (title_ids != self.vocab.pad_idx).long()
 
         return {
             "image": image,
             "caption_ids": caption_ids,
-            "caption_mask": attention_mask,
+            "caption_mask": caption_mask,
+            "title_ids": title_ids,
+            "title_mask": title_mask,
             "raw_caption": sample["caption"],
             "raw_title": sample["title"],
             "image_path": sample["image_path"],
