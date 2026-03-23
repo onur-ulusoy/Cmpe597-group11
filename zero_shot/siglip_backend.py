@@ -2,18 +2,15 @@ from pathlib import Path
 from typing import Sequence
 
 import torch
+import torch.nn.functional as F
 from PIL import Image
 from tqdm import tqdm
-
-from common import l2_normalize
-
 
 class SigLIPBackend:
     def __init__(self, checkpoint: str, device: str):
         from transformers import AutoModel, AutoProcessor
 
         self.device = device
-        # self.processor = AutoProcessor.from_pretrained(checkpoint)
         self.processor = AutoProcessor.from_pretrained(checkpoint, use_fast=False)
         self.model = AutoModel.from_pretrained(checkpoint).to(device)
         self.model.eval()
@@ -21,30 +18,20 @@ class SigLIPBackend:
     def _extract_image_features(self, outputs) -> torch.Tensor:
         if isinstance(outputs, torch.Tensor):
             return outputs
-
         if hasattr(outputs, "image_embeds") and outputs.image_embeds is not None:
             return outputs.image_embeds
-
         if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
             return outputs.pooler_output
-
-        raise RuntimeError(
-            f"Could not extract image features from output type {type(outputs)}"
-        )
+        raise RuntimeError(f"Could not extract image features from output type {type(outputs)}")
 
     def _extract_text_features(self, outputs) -> torch.Tensor:
         if isinstance(outputs, torch.Tensor):
             return outputs
-
         if hasattr(outputs, "text_embeds") and outputs.text_embeds is not None:
             return outputs.text_embeds
-
         if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
             return outputs.pooler_output
-
-        raise RuntimeError(
-            f"Could not extract text features from output type {type(outputs)}"
-        )
+        raise RuntimeError(f"Could not extract text features from output type {type(outputs)}")
 
     @torch.no_grad()
     def encode_images(self, image_paths: Sequence[Path], batch_size: int) -> torch.Tensor:
@@ -53,23 +40,12 @@ class SigLIPBackend:
             batch_paths = image_paths[start:start + batch_size]
             images = [Image.open(p).convert("RGB") for p in batch_paths]
 
-            inputs = self.processor(
-                images=images,
-                return_tensors="pt",
-            )
+            inputs = self.processor(images=images, return_tensors="pt")
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
             outputs = self.model.get_image_features(**inputs)
-            ##################
-            if start == 0:
-                print("IMAGE FEATURE OUTPUT TYPE:", type(outputs))
-                if hasattr(outputs, "image_embeds") and outputs.image_embeds is not None:
-                    print("image_embeds shape:", outputs.image_embeds.shape)
-                if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
-                    print("pooler_output shape:", outputs.pooler_output.shape)
-            ##################3
             feats = self._extract_image_features(outputs)
-            feats = l2_normalize(feats.float())
+            feats = F.normalize(feats.float(), p=2, dim=-1)
             all_feats.append(feats.cpu())
 
         return torch.cat(all_feats, dim=0)
@@ -91,14 +67,7 @@ class SigLIPBackend:
 
             outputs = self.model.get_text_features(**inputs)
             feats = self._extract_text_features(outputs)
-            feats = l2_normalize(feats.float())
+            feats = F.normalize(feats.float(), p=2, dim=-1)
             all_feats.append(feats.cpu())
-        #####################
-        if start == 0:
-            print("TEXT FEATURE OUTPUT TYPE:", type(outputs))
-            if hasattr(outputs, "text_embeds") and outputs.text_embeds is not None:
-                print("text_embeds shape:", outputs.text_embeds.shape)
-            if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
-                print("pooler_output shape:", outputs.pooler_output.shape)
-        #####################
+
         return torch.cat(all_feats, dim=0)

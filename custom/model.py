@@ -185,7 +185,7 @@ class MatchingModel(nn.Module):
         logit_scale = self.logit_scale.exp().clamp(max=100.0)
 
         return {
-            "image_emb": meme_emb, # Kept as 'image_emb' so loss.py doesn't need to change
+            "image_emb": meme_emb,
             "text_emb": caption_emb,
             "logit_scale": logit_scale,
         }

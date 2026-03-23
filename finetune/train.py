@@ -4,15 +4,15 @@ import torch.nn as nn
 import sys
 import os
 from datetime import datetime
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
+from PIL import Image
 import open_clip 
 from peft import LoraConfig, get_peft_model
 from tqdm import tqdm
 
-# Add root directory to path
 sys.path.append(os.getcwd())
-import utils 
-from finetune.dataset import MemeCapTrainDataset
+from utils import set_seed, log_metrics, plot_loss
+from dataset import load_memecap_records
 
 # --- Adapter Helper ---
 class OpenClipAdapter:
@@ -35,12 +35,37 @@ class OpenClipAdapter:
             
         return data
 
+# --- Finetune Specific Dataset ---
+class MemeCapFinetuneDataset(Dataset):
+    def __init__(self, records, processor):
+        self.records = records
+        self.processor = processor
+        
+    def __len__(self):
+        return len(self.records)
+
+    def __getitem__(self, idx):
+        sample = self.records[idx]
+        
+        try:
+            image = Image.open(sample.image_path).convert("RGB")
+        except:
+            image = Image.new('RGB', (224, 224), (0, 0, 0))
+            
+        processed_image = self.processor(images=image, return_tensors="pt")["pixel_values"].squeeze(0)
+        processed_caption = self.processor(text=sample.caption, return_tensors="pt")["input_ids"].squeeze(0)
+        processed_title = self.processor(text=sample.title, return_tensors="pt")["input_ids"].squeeze(0)
+
+        return {
+            "pixel_values": processed_image,
+            "input_ids": processed_caption,
+            "title_ids": processed_title 
+        }
+
 def train(args):
+    set_seed(42)
     # --- 1. Automated Directory Setup ---
-    # Base folder: outputs/finetune_type1 OR outputs/finetune_type2
     base_save_dir = os.path.join("outputs", f"finetune_{args.task}")
-    
-    # Run folder: outputs/finetune_type1/20260323_120000
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = os.path.join(base_save_dir, timestamp)
     os.makedirs(run_dir, exist_ok=True)
@@ -49,8 +74,8 @@ def train(args):
     plot_file = os.path.join(run_dir, "loss_plot.png")
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"🚀 Training Task: {args.task.upper()}")
-    print(f"📂 Saving to: {run_dir}")
+    print(f"Training Task: {args.task.upper()}")
+    print(f"Saving to: {run_dir}")
 
     # --- 2. Load Model ---
     model_name = "ViT-L-14"
@@ -81,11 +106,9 @@ def train(args):
     model.train()
 
     # --- 4. Data Loader ---
-    dataset = MemeCapTrainDataset(
-        json_path=args.train_json,
-        image_root=args.image_root,
-        processor=processor
-    )
+    # Call the universal data loader from the root
+    records = load_memecap_records(args.train_json, args.image_root)
+    dataset = MemeCapFinetuneDataset(records, processor)
     
     dataloader = DataLoader(
         dataset, 
@@ -97,11 +120,8 @@ def train(args):
     )
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
-    
-    # Loss Functions
     loss_img = nn.CrossEntropyLoss()
     loss_txt = nn.CrossEntropyLoss()
-    
     loss_history = []
 
     # --- 5. Training Loop ---
@@ -116,30 +136,21 @@ def train(args):
             captions = batch["input_ids"].to(device)
             titles = batch["title_ids"].to(device)
             
-            # A. Encode Features
-            # We access the base CLIP model inside the LoRA wrapper
-            # LoRA wraps the linear layers, so calling model.model.encode_... works
+            # Access base CLIP model inside LoRA wrapper
             img_feats = model.model.encode_image(images)
             cap_feats = model.model.encode_text(captions)
             title_feats = model.model.encode_text(titles)
             
-            # B. Define Query based on Task
             if args.task == "type1":
-                # Type 1: Query = Image
                 query_feats = img_feats
             elif args.task == "type2":
-                # Type 2: Query = Image + Title
-                # Normalize first to give equal weight
                 img_norm = img_feats / img_feats.norm(dim=1, keepdim=True)
                 title_norm = title_feats / title_feats.norm(dim=1, keepdim=True)
-                # Average them
                 query_feats = (img_norm + title_norm) / 2.0
             
-            # C. Normalize for Loss Calculation
             query_feats = query_feats / query_feats.norm(dim=1, keepdim=True)
             cap_feats = cap_feats / cap_feats.norm(dim=1, keepdim=True)
             
-            # D. Compute Similarity & Loss
             logit_scale = model.model.logit_scale.exp()
             
             logits_per_query = logit_scale * query_feats @ cap_feats.t()
@@ -160,24 +171,19 @@ def train(args):
         loss_history.append(avg_loss)
         print(f"Epoch {epoch} Average Loss: {avg_loss:.4f}")
         
-        # Log and Save
-        utils.log_metrics(log_file, epoch, avg_loss)
-        utils.plot_loss(loss_history, plot_file)
+        # Using universal loggers
+        log_metrics(log_file, epoch, avg_loss)
+        plot_loss(loss_history, plot_file)
         
         save_path = os.path.join(run_dir, f"lora_epoch_{epoch}")
         model.save_pretrained(save_path)
-        print(f"✅ Saved adapter to {save_path}\n")
+        print(f"Saved adapter to {save_path}\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # Required Task Argument
-    parser.add_argument("--task", type=str, required=True, choices=["type1", "type2"], 
-                        help="type1: Image only. type2: Image + Title fusion.")
-    
+    parser.add_argument("--task", type=str, required=True, choices=["type1", "type2"])
     parser.add_argument("--train_json", type=str, default="data/memes-trainval.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    # output_dir argument REMOVED (Automated)
-    
     parser.add_argument("--batch_size", type=int, default=32) 
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--lr", type=float, default=1e-4)
