@@ -2,187 +2,133 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
-class ResidualBlock(nn.Module):
-    def __init__(self, in_ch: int, out_ch: int, stride: int = 1, dropout: float = 0.0):
+# --- 1. Shallow Image Encoder ---
+class SimpleImageEncoder(nn.Module):
+    def __init__(self, feat_dim: int = 256, dropout: float = 0.1):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_ch, out_ch, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(out_ch)
-        self.conv2 = nn.Conv2d(out_ch, out_ch, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn2 = nn.BatchNorm2d(out_ch)
-        self.dropout = nn.Dropout2d(dropout)
+        
+        # A simple 4-layer CNN. 
+        # We increase channels slowly: 3 -> 32 -> 64 -> 128 -> 256
+        self.features = nn.Sequential(
+            # Block 1
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2), # 224 -> 112
 
-        if stride != 1 or in_ch != out_ch:
-            self.skip = nn.Sequential(
-                nn.Conv2d(in_ch, out_ch, kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(out_ch),
-            )
-        else:
-            self.skip = nn.Identity()
-
-    def forward(self, x):
-        identity = self.skip(x)
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = F.gelu(out)
-        out = self.dropout(out)
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = out + identity
-        out = F.gelu(out)
-        return out
-
-
-class ImageEncoderCNN(nn.Module):
-    def __init__(self, feat_dim: int = 256, dropout: float = 0.05):
-        super().__init__()
-        self.stem = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
+            # Block 2
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
-            nn.GELU(),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
-        )
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2), # 112 -> 56
 
-        self.layer1 = nn.Sequential(
-            ResidualBlock(64, 64, stride=1, dropout=dropout),
-            ResidualBlock(64, 64, stride=1, dropout=dropout),
-        )
-        self.layer2 = nn.Sequential(
-            ResidualBlock(64, 128, stride=2, dropout=dropout),
-            ResidualBlock(128, 128, stride=1, dropout=dropout),
-        )
-        self.layer3 = nn.Sequential(
-            ResidualBlock(128, 256, stride=2, dropout=dropout),
-            ResidualBlock(256, 256, stride=1, dropout=dropout),
-        )
-        self.layer4 = nn.Sequential(
-            ResidualBlock(256, 512, stride=2, dropout=dropout),
-            ResidualBlock(512, 512, stride=1, dropout=dropout),
-        )
+            # Block 3
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2), # 56 -> 28
 
-        self.pool = nn.AdaptiveAvgPool2d((1, 1))
+            # Block 4
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.AdaptiveAvgPool2d((1, 1)) # 28 -> 1 (Global Average Pooling)
+        )
+        
+        # Projection Head
         self.proj = nn.Sequential(
-            nn.LayerNorm(512),
-            nn.Linear(512, 512),
-            nn.GELU(),
+            nn.Flatten(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(512, feat_dim),
+            nn.Linear(256, feat_dim)
         )
+
+        # IMPORTANT: Initialize weights for scratch training
+        self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        x = self.stem(x)
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-
-        x = self.pool(x).flatten(1)
+        x = self.features(x)
         x = self.proj(x)
         return x
 
-
+# --- 2. Text Encoder (Keep it, but ensure initialization) ---
 class TextEncoderGRU(nn.Module):
-    def __init__(
-        self,
-        vocab_size: int,
-        pad_idx: int,
-        word_dim: int = 256,
-        hidden_dim: int = 256,
-        num_layers: int = 1,
-        dropout: float = 0.15,
-        feat_dim: int = 256,
-    ):
+    def __init__(self, vocab_size, pad_idx, word_dim=256, hidden_dim=256, num_layers=1, dropout=0.1, feat_dim=256):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, word_dim, padding_idx=pad_idx)
-        self.embedding_dropout = nn.Dropout(dropout)
         self.input_norm = nn.LayerNorm(word_dim)
-
+        
         self.gru = nn.GRU(
             input_size=word_dim,
             hidden_size=hidden_dim,
             num_layers=num_layers,
             batch_first=True,
-            bidirectional=True,
-            dropout=0.0,
+            bidirectional=True
         )
-
-        pooled_dim = hidden_dim * 2 * 2
-
+        
+        pooled_dim = hidden_dim * 2
+        
         self.proj = nn.Sequential(
-            nn.LayerNorm(pooled_dim),
             nn.Linear(pooled_dim, pooled_dim),
-            nn.GELU(),
+            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(pooled_dim, feat_dim),
+            nn.Linear(pooled_dim, feat_dim)
         )
+        
+        self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            nn.init.xavier_uniform_(m.weight)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.Embedding):
+            nn.init.normal_(m.weight, mean=0, std=0.02)
 
     def forward(self, input_ids, attention_mask):
         x = self.embedding(input_ids)
         x = self.input_norm(x)
-        x = self.embedding_dropout(x)
-
+        
         out, _ = self.gru(x)
+        
+        # Mean Pooling masked
         mask = attention_mask.unsqueeze(-1).float()
-        mean_pooled = (out * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-6)
+        pooled = (out * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-6)
+        
+        return self.proj(pooled)
 
-        masked_out = out.masked_fill(mask == 0, float("-inf"))
-        max_pooled = masked_out.max(dim=1).values
-        max_pooled[max_pooled == float("-inf")] = 0.0
-
-        pooled = torch.cat([mean_pooled, max_pooled], dim=-1)
-        pooled = self.proj(pooled)
-        return pooled
-
-
+# --- 3. Main Model ---
 class Type1MatchingModel(nn.Module):
-    def __init__(
-        self,
-        vocab_size: int,
-        pad_idx: int,
-        feat_dim: int = 256,
-        word_dim: int = 256,
-        text_hidden_dim: int = 256,
-        text_num_layers: int = 1,
-        text_dropout: float = 0.15,
-        image_dropout: float = 0.05,
-    ):
+    def __init__(self, vocab_size, pad_idx, feat_dim=256, **kwargs):
         super().__init__()
-
-        self.image_encoder = ImageEncoderCNN(
-            feat_dim=feat_dim,
-            dropout=image_dropout,
-        )
-        self.text_encoder = TextEncoderGRU(
-            vocab_size=vocab_size,
-            pad_idx=pad_idx,
-            word_dim=word_dim,
-            hidden_dim=text_hidden_dim,
-            num_layers=text_num_layers,
-            dropout=text_dropout,
-            feat_dim=feat_dim,
-        )
-
+        self.image_encoder = SimpleImageEncoder(feat_dim=feat_dim)
+        self.text_encoder = TextEncoderGRU(vocab_size, pad_idx, feat_dim=feat_dim)
+        
+        # Learnable temperature, initialized to ~2.65
         self.logit_scale = nn.Parameter(torch.tensor(2.6592))
 
-    def encode_image(self, images, normalize: bool = True):
-        feats = self.image_encoder(images)
-        if normalize:
-            feats = F.normalize(feats, dim=-1)
-        return feats
-
-    def encode_text(self, input_ids, attention_mask, normalize: bool = True):
-        feats = self.text_encoder(input_ids, attention_mask)
-        if normalize:
-            feats = F.normalize(feats, dim=-1)
-        return feats
-
     def forward(self, images, caption_ids, caption_mask):
-        image_emb = self.encode_image(images, normalize=True)
-        text_emb = self.encode_text(caption_ids, caption_mask, normalize=True)
-        logit_scale = self.logit_scale.exp().clamp(max=100.0)
-
+        img_emb = F.normalize(self.image_encoder(images), dim=-1)
+        txt_emb = F.normalize(self.text_encoder(caption_ids, caption_mask), dim=-1)
+        
         return {
-            "image_emb": image_emb,
-            "text_emb": text_emb,
-            "logit_scale": logit_scale,
+            "image_emb": img_emb,
+            "text_emb": txt_emb,
+            "logit_scale": self.logit_scale.exp().clamp(max=100)
         }
+    
+    # Helper for evaluation
+    def encode_image(self, images, normalize=True):
+        feats = self.image_encoder(images)
+        return F.normalize(feats, dim=-1) if normalize else feats
+
+    def encode_text(self, input_ids, mask, normalize=True):
+        feats = self.text_encoder(input_ids, mask)
+        return F.normalize(feats, dim=-1) if normalize else feats

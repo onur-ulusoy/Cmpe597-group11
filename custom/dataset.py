@@ -91,24 +91,26 @@ def build_image_transform(image_size: int = 224, train: bool = True):
     )
 
     if train:
-        # Improved augmentations: Random crop instead of static resize, no horizontal flip
         return transforms.Compose([
-            transforms.RandomResizedCrop((image_size, image_size), scale=(0.8, 1.0)),
-            transforms.ColorJitter(
-                brightness=0.1,
-                contrast=0.1,
-                saturation=0.1,
-            ),
+            # 1. Resize directly to square (distorts aspect ratio but keeps text)
+            transforms.Resize((image_size, image_size)),
+            
+            # 2. Mild Color Jitter (helps generalization)
+            transforms.ColorJitter(brightness=0.2, contrast=0.2),
+            
+            # 3. Random Horizontal Flip? NO. 
+            # Flipping a meme mirrors the text, making it unreadable.
+            
             transforms.ToTensor(),
             normalize,
         ])
 
+    # Validation/Test
     return transforms.Compose([
         transforms.Resize((image_size, image_size)),
         transforms.ToTensor(),
         normalize,
     ])
-
 
 def load_memecap_records(json_path: str, image_root: str):
     json_path = Path(json_path)
