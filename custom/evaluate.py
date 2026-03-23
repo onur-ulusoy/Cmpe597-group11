@@ -1,10 +1,11 @@
 import argparse
+import os
 
 import torch
 from torch.utils.data import DataLoader
 
 from dataset import MemeCapCustomDataset, Vocab, build_image_transform, load_memecap_records
-from model import Type1MatchingModel
+from model import MatchingModel
 from utils import compute_recall_at_k, load_checkpoint, save_json
 
 def get_device():
@@ -17,33 +18,33 @@ def get_device():
 @torch.no_grad()
 def encode_dataset(model, dataloader, device):
     model.eval()
-    image_embs = []
-    text_embs = []
+    meme_embs = []
+    caption_embs = []
 
     for batch in dataloader:
         images = batch["image"].to(device)
         caption_ids = batch["caption_ids"].to(device)
         caption_mask = batch["caption_mask"].to(device)
+        title_ids = batch["title_ids"].to(device)
+        title_mask = batch["title_mask"].to(device)
 
-        image_emb = model.encode_image(images, normalize=True)
-        text_emb = model.encode_text(caption_ids, caption_mask, normalize=True)
+        meme_emb = model.encode_meme(images, title_ids, title_mask, normalize=True)
+        caption_emb = model.encode_caption(caption_ids, caption_mask, normalize=True)
 
-        image_embs.append(image_emb.cpu())
-        text_embs.append(text_emb.cpu())
+        meme_embs.append(meme_emb.cpu())
+        caption_embs.append(caption_emb.cpu())
 
-    image_embs = torch.cat(image_embs, dim=0)
-    text_embs = torch.cat(text_embs, dim=0)
-    return image_embs, text_embs
+    meme_embs = torch.cat(meme_embs, dim=0)
+    caption_embs = torch.cat(caption_embs, dim=0)
+    return meme_embs, caption_embs
 
 @torch.no_grad()
 def evaluate_matching(model, dataloader, device):
-    image_embs, text_embs = encode_dataset(model, dataloader, device)
-    image_embs = image_embs.to(device)
-    text_embs = text_embs.to(device)
+    meme_embs, caption_embs = encode_dataset(model, dataloader, device)
+    meme_embs = meme_embs.to(device)
+    caption_embs = caption_embs.to(device)
 
-    # Calculate full score matrix 
-    score_matrix = image_embs @ text_embs.T
-
+    score_matrix = meme_embs @ caption_embs.T
     return compute_recall_at_k(score_matrix.cpu(), ks=(1, 5, 10))
 
 def main(args):
@@ -52,10 +53,15 @@ def main(args):
 
     vocab = Vocab(checkpoint["vocab_stoi"])
     model_args = checkpoint["args"]
+    
+    # Automatically extract the model_type used during training
+    model_type = model_args.get("model_type", "type1")
+    print(f"[Info] Loaded a {model_type.upper()} checkpoint.")
 
-    model = Type1MatchingModel(
+    model = MatchingModel(
         vocab_size=len(vocab),
         pad_idx=vocab.pad_idx,
+        model_type=model_type,
         feat_dim=model_args["feat_dim"],
         word_dim=model_args["word_dim"],
         text_hidden_dim=model_args["text_hidden_dim"],
@@ -84,19 +90,24 @@ def main(args):
 
     metrics = evaluate_matching(model, dataloader, device)
 
-    print("[Type1 Test Metrics]")
+    print(f"[{model_type.upper()} Test Metrics]")
     for k, v in metrics.items():
         print(f"{k}: {v}")
 
     if args.output_json:
-        save_json(args.output_json, metrics)
+        # Save dynamically based on model type
+        out_dir = os.path.dirname(args.output_json)
+        os.makedirs(out_dir, exist_ok=True)
+        final_out_path = os.path.join(out_dir, f"{model_type}_test_metrics.json")
+        save_json(final_out_path, metrics)
+        print(f"[Info] Saved metrics to {final_out_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--test_json", type=str, default="data/memes-test.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--output_json", type=str, default="outputs/custom_type1_match/test_metrics.json")
+    parser.add_argument("--output_json", type=str, default="outputs/custom_models/eval_metrics.json")
 
     parser.add_argument("--image_size", type=int, default=224)
     parser.add_argument("--max_text_len", type=int, default=40)

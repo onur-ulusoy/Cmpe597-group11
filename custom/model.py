@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 class ResidualBlock(nn.Module):
     def __init__(self, in_ch: int, out_ch: int, stride: int = 1, dropout: float = 0.0):
         super().__init__()
@@ -75,7 +74,6 @@ class ImageEncoderCNN(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-
         x = self.pool(x).flatten(1)
         x = self.proj(x)
         return x
@@ -83,14 +81,8 @@ class ImageEncoderCNN(nn.Module):
 
 class TextEncoderGRU(nn.Module):
     def __init__(
-        self,
-        vocab_size: int,
-        pad_idx: int,
-        word_dim: int = 256,
-        hidden_dim: int = 256,
-        num_layers: int = 1,
-        dropout: float = 0.15,
-        feat_dim: int = 256,
+        self, vocab_size: int, pad_idx: int, word_dim: int = 256, 
+        hidden_dim: int = 256, num_layers: int = 1, dropout: float = 0.15, feat_dim: int = 256,
     ):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, word_dim, padding_idx=pad_idx)
@@ -98,16 +90,11 @@ class TextEncoderGRU(nn.Module):
         self.input_norm = nn.LayerNorm(word_dim)
 
         self.gru = nn.GRU(
-            input_size=word_dim,
-            hidden_size=hidden_dim,
-            num_layers=num_layers,
-            batch_first=True,
-            bidirectional=True,
-            dropout=0.0,
+            input_size=word_dim, hidden_size=hidden_dim, num_layers=num_layers,
+            batch_first=True, bidirectional=True, dropout=0.0,
         )
 
         pooled_dim = hidden_dim * 2 * 2
-
         self.proj = nn.Sequential(
             nn.LayerNorm(pooled_dim),
             nn.Linear(pooled_dim, pooled_dim),
@@ -134,55 +121,71 @@ class TextEncoderGRU(nn.Module):
         return pooled
 
 
-class Type1MatchingModel(nn.Module):
+class FeatureFusion(nn.Module):
+    def __init__(self, feat_dim: int = 256):
+        super().__init__()
+        self.proj = nn.Sequential(
+            nn.Linear(feat_dim * 2, feat_dim),
+            nn.GELU(),
+            nn.LayerNorm(feat_dim)
+        )
+
+    def forward(self, img_feat, title_feat):
+        fused = torch.cat([img_feat, title_feat], dim=-1)
+        return self.proj(fused)
+
+
+class MatchingModel(nn.Module):
     def __init__(
-        self,
-        vocab_size: int,
-        pad_idx: int,
-        feat_dim: int = 256,
-        word_dim: int = 256,
-        text_hidden_dim: int = 256,
-        text_num_layers: int = 1,
-        text_dropout: float = 0.15,
-        image_dropout: float = 0.05,
+        self, vocab_size: int, pad_idx: int, model_type: str = "type1",
+        feat_dim: int = 256, word_dim: int = 256, text_hidden_dim: int = 256,
+        text_num_layers: int = 1, text_dropout: float = 0.15, image_dropout: float = 0.05,
     ):
         super().__init__()
+        self.model_type = model_type
+        self.image_encoder = ImageEncoderCNN(feat_dim=feat_dim, dropout=image_dropout)
+        
+        self.caption_encoder = TextEncoderGRU(
+            vocab_size=vocab_size, pad_idx=pad_idx, word_dim=word_dim,
+            hidden_dim=text_hidden_dim, num_layers=text_num_layers,
+            dropout=text_dropout, feat_dim=feat_dim,
+        )
 
-        self.image_encoder = ImageEncoderCNN(
-            feat_dim=feat_dim,
-            dropout=image_dropout,
-        )
-        self.text_encoder = TextEncoderGRU(
-            vocab_size=vocab_size,
-            pad_idx=pad_idx,
-            word_dim=word_dim,
-            hidden_dim=text_hidden_dim,
-            num_layers=text_num_layers,
-            dropout=text_dropout,
-            feat_dim=feat_dim,
-        )
+        if self.model_type == "type2":
+            self.title_encoder = TextEncoderGRU(
+                vocab_size=vocab_size, pad_idx=pad_idx, word_dim=word_dim,
+                hidden_dim=text_hidden_dim, num_layers=text_num_layers,
+                dropout=text_dropout, feat_dim=feat_dim,
+            )
+            self.fusion = FeatureFusion(feat_dim=feat_dim)
 
         self.logit_scale = nn.Parameter(torch.tensor(2.6592))
 
-    def encode_image(self, images, normalize: bool = True):
-        feats = self.image_encoder(images)
+    def encode_meme(self, images, title_ids=None, title_mask=None, normalize: bool = True):
+        feat = self.image_encoder(images)
+        
+        # If Type 2, extract title and fuse
+        if self.model_type == "type2" and title_ids is not None:
+            title_feat = self.title_encoder(title_ids, title_mask)
+            feat = self.fusion(feat, title_feat)
+            
+        if normalize:
+            feat = F.normalize(feat, dim=-1)
+        return feat
+
+    def encode_caption(self, caption_ids, caption_mask, normalize: bool = True):
+        feats = self.caption_encoder(caption_ids, caption_mask)
         if normalize:
             feats = F.normalize(feats, dim=-1)
         return feats
 
-    def encode_text(self, input_ids, attention_mask, normalize: bool = True):
-        feats = self.text_encoder(input_ids, attention_mask)
-        if normalize:
-            feats = F.normalize(feats, dim=-1)
-        return feats
-
-    def forward(self, images, caption_ids, caption_mask):
-        image_emb = self.encode_image(images, normalize=True)
-        text_emb = self.encode_text(caption_ids, caption_mask, normalize=True)
+    def forward(self, images, title_ids, title_mask, caption_ids, caption_mask):
+        meme_emb = self.encode_meme(images, title_ids, title_mask, normalize=True)
+        caption_emb = self.encode_caption(caption_ids, caption_mask, normalize=True)
         logit_scale = self.logit_scale.exp().clamp(max=100.0)
 
         return {
-            "image_emb": image_emb,
-            "text_emb": text_emb,
+            "image_emb": meme_emb, # Kept as 'image_emb' so loss.py doesn't need to change
+            "text_emb": caption_emb,
             "logit_scale": logit_scale,
         }
