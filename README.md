@@ -117,7 +117,7 @@ To improve upon the zero-shot baseline, we fine-tuned the **OpenCLIP (ViT-L/14)*
 *   **Training:** We trained for 10 epochs using a contrastive loss function on **Image-Caption** pairs.
 *   **Loss Dynamics:** The model converged rapidly, with the training loss decreasing from **0.76** in Epoch 1 to **0.02** by Epoch 10.
 
-![Training Loss Plot Type 1](outputs/finetune_type1/20260322_102324/loss_plot.png)
+![Training Loss Plot Type 1](outputs/finetune/type1/20260322_102324/loss_plot.png)
 *Figure: Type 1 Training loss over 10 epochs.*
 
 **Model Selection (Type 1):**
@@ -132,7 +132,7 @@ For the **Type 2** task (Image + Title), simply using the image-only model yield
 *   **Training:** The model was trained to minimize the contrastive loss between this *fused* representation and the caption.
 *   **Model Selection:** The model converged even faster due to the added semantic information from the titles. We selected **Epoch 3** as the optimal checkpoint, achieving a significant boost in performance.
 
-![Training Loss Plot Type 2](outputs/finetune_type2/20260323_153611/loss_plot.png)
+![Training Loss Plot Type 2](outputs/finetune/type2/20260323_153611/loss_plot.png)
 *Figure: Type 2 Training loss showing rapid convergence.*
 
 ---
