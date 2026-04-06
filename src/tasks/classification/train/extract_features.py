@@ -45,6 +45,10 @@ def extract_features(json_path, image_root, output_dir, backend, batch_size=64):
 
     print(f"Extracting {len(image_paths)} images from {json_path}...")
     for images, fnames in tqdm(img_loader, desc="Images"):
+        # Check if entire batch exists
+        if all([os.path.exists(os.path.join(img_save_dir, f"{fname}.pt")) for fname in fnames]):
+            continue
+            
         images = images.to(backend.device)
         with torch.no_grad():
             feats = backend.model.encode_image(images)
@@ -66,14 +70,27 @@ def extract_features(json_path, image_root, output_dir, backend, batch_size=64):
     print(f"Extracting {len(unique_texts)} texts...")
     for i in tqdm(range(0, len(unique_texts), batch_size), desc="Texts"):
         batch_texts = unique_texts[i:i+batch_size]
+        
+        # Check if entire batch exists
+        if all([os.path.exists(os.path.join(text_save_dir, f"{get_text_hash(text)}.pt")) for text in batch_texts]):
+            continue
+            
         feats = backend.encode_texts(batch_texts, batch_size=len(batch_texts))
         for text, feat in zip(batch_texts, feats):
             t_hash = get_text_hash(text)
             torch.save(feat, os.path.join(text_save_dir, f"{t_hash}.pt"))
             
     # Save mapping for texts
-    mapping = {text: get_text_hash(text) for text in unique_texts}
-    with open(os.path.join(output_dir, "text_mapping.json"), "w") as f:
+    mapping_path = os.path.join(output_dir, "text_mapping.json")
+    if os.path.exists(mapping_path):
+        with open(mapping_path, "r") as f:
+            existing_mapping = json.load(f)
+        existing_mapping.update({text: get_text_hash(text) for text in unique_texts})
+        mapping = existing_mapping
+    else:
+        mapping = {text: get_text_hash(text) for text in unique_texts}
+        
+    with open(mapping_path, "w") as f:
         json.dump(mapping, f)
 
 if __name__ == "__main__":
