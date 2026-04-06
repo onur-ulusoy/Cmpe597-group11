@@ -1,0 +1,19 @@
+{
+  "train_json": "data/memes-trainval.json",
+  "test_json": "data/memes-test.json",
+  "image_root": "data/memes",
+  "output_dir": "outputs/classification/train/",
+  "model_name": "ViT-L-14",
+  "pretrained": "laion2b_s32b_b82k",
+  "batch_size": 32,
+  "eval_batch_size": 64,
+  "epochs": 10,
+  "lr": 0.0001,
+  "weight_decay": 0.01,
+  "hidden_dim": 512,
+  "dropout": 0.3,
+  "limit": null,
+  "seed": 42,
+  "device": "cuda",
+  "feature_dir": "data/features/openclip_vit_l_14"
+}
