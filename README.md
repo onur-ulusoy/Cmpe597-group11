@@ -137,9 +137,14 @@ For the **Type 2** task (Image + Title), simply using the image-only model yield
 
 ## 4. Task 2.2: Literal vs. Metaphorical Caption Classification
 
-The goal of this task is to design a classifier that distinguishes between image-caption pairs where the caption literally describes the image and those where it provides a metaphorical interpretation (the intended meme meaning).
+The goal of this task is to design a classifier that distinguishes between image-caption pairs where the caption literally describes the image and those where it provides a metaphorical interpretation.
 
-### (a) Evaluation Framework & Metrics
+### (a) Evaluation Framework & Zero-Shot Baseline
+
+We've established the classification framework and established a zero-shot similarity-based baseline.
+
+#### 1. Formulating the Task
+We formulated this task as a **binary classification problem**. Positive samples (Label 1) are pairs of (Meme Image, Meme Caption), and negative samples (Label 0) are pairs of (Meme Image, Literal Image Caption).
 
 We formulated this task as a **binary classification problem**. Positive samples (Label 1) are pairs of (Meme Image, Meme Caption), and negative samples (Label 0) are pairs of (Meme Image, Literal Image Caption).
 
@@ -149,16 +154,14 @@ We formulated this task as a **binary classification problem**. Positive samples
 *   **Precision & Recall:** Individual components to monitor for class-specific biases.
 *   **ROC-AUC:** Measures the model's ability to rank metaphorical captions higher than literal ones across all possible classification thresholds.
 
-### (b) Baseline Strategy: Similarity-Based Zero-Shot Classification
-
-As an initial baseline, we utilize the **OpenCLIP (ViT-L/14)** dual-encoder. Since CLIP is trained to align images with literal descriptions, we hypothesize that **Literal Image Captions** will exhibit significantly higher cosine similarity with the meme image than the abstract/metaphorical **Meme Captions**.
+#### 2. Selected Baseline Strategy
+As an initial baseline, we utilize the **OpenCLIP (ViT-L/14)** dual-encoder. Since CLIP is trained to align images with literal descriptions, we hypothesize that **Literal Image Captions** will exhibit higher visual similarity to the image. 
 
 **Classification Heuristic:**
-We compute the representation of the image ($e_i$) and the candidate caption ($e_c$). The classification score $P(\text{metaphorical})$ is defined as:
-$$
-P(\text{metaphorical}) = 1 - \cos(e_i, e_c)
-$$
-By evaluating this score on the test set, we determine the **optimal similarity threshold** that maximizes the F1-Score, establishing a competitive zero-shot baseline for the task.
+We compute $P(\text{metaphorical}) = 1 - \cos(e_i, e_c)$. By evaluating this score on the test set, we determine the **optimal similarity threshold** that maximizes the F1-Score.
+
+#### 3. Result Analysis & Rationale for Task 2.2(b)
+The initial zero-shot evaluation yields a decent **F1-Score (0.800)** but a low **ROC-AUC (0.241)**. This highlights a critical **Keyword Bias**: metaphorical captions often contain specific entities (e.g., "Spiderman") that match the visual content perfectly, making a simple similarity threshold insufficient. This confirms the need for dedicated fusion architectures in **Task 2.2(b)**.
 
 ---
 
