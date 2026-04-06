@@ -1,0 +1,12 @@
+{
+  "run_name": "Zero-Shot_ViT-L-14_Thresh0.57",
+  "model_name": "ViT-L-14",
+  "threshold": 0.5701206922531128,
+  "metrics": {
+    "accuracy": 0.6666666666666666,
+    "precision": 0.6666666666666666,
+    "recall": 1.0,
+    "f1": 0.8,
+    "roc_auc": 0.24134948096885814
+  }
+}
