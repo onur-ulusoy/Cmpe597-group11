@@ -120,7 +120,7 @@ def main(args):
         def __getitem__(self, idx):
             sample = self.samples[idx]
             if self.feature_dir:
-                img_path = os.path.join(self.feature_dir, "images", f"{sample.image_fname}.pt")
+                img_path = os.path.join(self.feature_dir, "images", f"{sample.image_path.name}.pt")
                 t_hash = self.text_mapping[sample.text]
                 text_path = os.path.join(self.feature_dir, "texts", f"{t_hash}.pt")
                 return {
