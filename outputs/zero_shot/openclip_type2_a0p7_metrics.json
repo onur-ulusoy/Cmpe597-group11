@@ -1,17 +1,17 @@
 {
-  "run_name": "openclip_type2",
+  "run_name": "openclip_type2_a0p7",
   "model_family": "openclip",
   "input_type": "type2",
   "alpha": 0.7,
-  "num_queries": 559,
-  "test_json": "data\\memes-test.json",
-  "image_root": "data\\memes",
+  "num_queries": 5,
+  "test_json": "data/memes-test.json",
+  "image_root": "data/memes",
   "metrics": {
-    "R@1": 0.5670840740203857,
-    "R@5": 0.7137746214866638,
-    "MRR": 0.638122022151947,
-    "MedR": 1.0,
-    "MeanR": 24.769229888916016
-  },
-  "missing_image_examples": []
+    "R@1": 1.0,
+    "R@5": 1.0,
+    "R@10": 1.0,
+    "MedR": 1,
+    "MeanR": 1.0,
+    "MRR": 1.0
+  }
 }
