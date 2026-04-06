@@ -130,16 +130,48 @@ For the **Type 2** task (Image + Title), simply using the image-only model yield
 
 *   **Fusion Strategy:** During training, we normalized and averaged the Image and Title embeddings: $E_{query} = \frac{E_{img} + E_{title}}{2}$.
 *   **Training:** The model was trained to minimize the contrastive loss between this *fused* representation and the caption.
-*   **Model Selection:** The model converged even faster due to the added semantic information from the titles. We selected **Epoch 3** as the optimal checkpoint, achieving a significant boost in performance.
-
-![Training Loss Plot Type 2](outputs/finetune/type2/20260323_153611/loss_plot.png)
+*   **Model Selection:** The model converged even faster due to the added semantic information from the titles. We selected **Epoch 3** as the optimal checkpoint, achieving a significant boost in performance.![Training Loss Plot Type 2](outputs/finetune/type2/20260323_153611/loss_plot.png)
 *Figure: Type 2 Training loss showing rapid convergence.*
 
 ---
 
-## 4. Results
+## 4. Task 2.2: Literal vs. Metaphorical Caption Classification
 
-Below is the comprehensive comparison of all models evaluated on the MemeCap test set for the Cross-Modal Retrieval task (Task 2.1).
+The goal of this task is to design a classifier that distinguishes between image-caption pairs where the caption literally describes the image and those where it provides a metaphorical interpretation (the intended meme meaning).
+
+### (a) Evaluation Framework & Metrics
+
+We formulated this task as a **binary classification problem**. Positive samples (Label 1) are pairs of (Meme Image, Meme Caption), and negative samples (Label 0) are pairs of (Meme Image, Literal Image Caption).
+
+**Selected Metrics:**
+*   **Accuracy:** Overall percentage of correctly classified pairs.
+*   **F1-Score:** The harmonic mean of precision and recall. This is our primary metric as it balances the model's ability to find all metaphorical captions (recall) without misclassifying literal ones (precision).
+*   **Precision & Recall:** Individual components to monitor for class-specific biases.
+*   **ROC-AUC:** Measures the model's ability to rank metaphorical captions higher than literal ones across all possible classification thresholds.
+
+### (b) Baseline Strategy: Similarity-Based Zero-Shot Classification
+
+As an initial baseline, we utilize the **OpenCLIP (ViT-L/14)** dual-encoder. Since CLIP is trained to align images with literal descriptions, we hypothesize that **Literal Image Captions** will exhibit significantly higher cosine similarity with the meme image than the abstract/metaphorical **Meme Captions**.
+
+**Classification Heuristic:**
+We compute the representation of the image ($e_i$) and the candidate caption ($e_c$). The classification score $P(\text{metaphorical})$ is defined as:
+$$
+P(\text{metaphorical}) = 1 - \cos(e_i, e_c)
+$$
+By evaluating this score on the test set, we determine the **optimal similarity threshold** that maximizes the F1-Score, establishing a competitive zero-shot baseline for the task.
+
+---
+
+## 5. Task 2.3: Meme Sentiment Classification
+
+*(Under Development)*
+This task involves classifying the emotion/sentiment of a meme based on its visual and textual content.
+
+---
+
+## 6. Performance Results
+
+### Task 2.1: Cross-Modal Retrieval (Meme-Caption Retrieval)
 
 | Model Source | Input Type | R@1 (%) | R@5 (%) | MRR (%) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -156,19 +188,23 @@ Below is the comprehensive comparison of all models evaluated on the MemeCap tes
 | **OpenCLIP Fine-Tuned (LoRA)** | Type 1 | 68.16 | 79.96 | 73.66 |
 | **OpenCLIP Fine-Tuned (LoRA)** | Type 2 | **66.91** | **82.47** | **74.02** |
 
-The table above summarizes the performance improvements achieved through LoRA fine-tuning.
+### Task 2.2: Literal vs. Metaphorical Caption Classification
 
-*   **Type 1 (Image Only):** We observed a solid **+7.87%** increase in R@1 accuracy, demonstrating that the model successfully adapted to the visual style of memes.
-*   **Type 2 (Image + Title):** By training a dedicated adapter for multimodal fusion, we achieved a massive **+10.20%** improvement in R@1 over the zero-shot baseline, proving the value of explicitly training on the fused inputs.
+| Model Source | Strategy | Accuracy | F1-Score | ROC-AUC |
+| :--- | :--- | :--- | :--- | :--- |
+| **OpenCLIP (ViT-L/14)** | Zero-Shot ($1-\text{Sim}$) | 0.667 | 0.800 | 0.241 |
 
-*Key Takeaway: While the Type 1 model improved image understanding, the dedicated Type 2 model successfully learned to leverage the "Title" context, significantly outperforming both the baseline and the image-only model on multimodal queries.*
+*Note: Baseline results were obtained on a subset of the test data to verify the framework.*
 
 ---
 
-## 5. Project Roadmap
+## 7. Project Roadmap
 
 - [x] **Task 2.1.a & 2.1.b:** Evaluation Framework & Zero-Shot Baselines
 - [x] **Task 2.1.c:** Custom Architecture Implementation
 - [x] **Task 2.1.d:** Finetuning Experiments (LoRA)
-- [ ] **Task 2.2:** Literal vs. Metaphorical Caption Classification
-- [ ] **Task 2.3:** Meme Sentiment Classification
+- [/] **Task 2.2:** Literal vs. Metaphorical Caption Classification
+    - [x] **2.2.a:** Evaluation Framework & Metrics
+    - [ ] **2.2.b:** Fusion Architectures Implementation
+    - [ ] **2.2.c:** Performance Comparison & Ablation
+- [ ] Task 2.3: Meme Sentiment Classification
