@@ -22,7 +22,7 @@ def get_device(preference=None):
     elif torch.backends.mps.is_available(): return "mps"
     return "cpu"
 
-def train_one_epoch(classifier, dataloader, backend, optimizer, criterion, device):
+def train_one_epoch(classifier, dataloader, backend, optimizer, criterion, device, use_features=False):
     classifier.train()
     running_loss = 0.0
     all_preds = []
@@ -30,19 +30,18 @@ def train_one_epoch(classifier, dataloader, backend, optimizer, criterion, devic
     
     progress = tqdm(dataloader, desc="Training", leave=False)
     for batch in progress:
-        img_paths = batch["image_path"] if "image_path" in batch else None
-        # Note: dataset returns PIL image, but for frozen CLIP we might prefer paths or pre-extracted
-        # To keep it simple, we use the backend's encode_images which takes paths
-        
-        texts = batch["text"]
         labels = batch["label"].to(device).float().unsqueeze(1)
-        
         optimizer.zero_grad()
         
-        with torch.no_grad():
-            # Extract features from frozen CLIP backend
-            img_emb = backend.encode_images(img_paths, batch_size=len(img_paths)).to(device)
-            text_emb = backend.encode_texts(texts, batch_size=len(texts)).to(device)
+        if use_features:
+            img_emb = batch["img_emb"].to(device)
+            text_emb = batch["text_emb"].to(device)
+        else:
+            img_paths = batch["image_path"]
+            texts = batch["text"]
+            with torch.no_grad():
+                img_emb = backend.encode_images(img_paths, batch_size=len(img_paths)).to(device)
+                text_emb = backend.encode_texts(texts, batch_size=len(texts)).to(device)
             
         # Forward through trainable classifier
         logits = classifier(img_emb, text_emb)
@@ -61,7 +60,7 @@ def train_one_epoch(classifier, dataloader, backend, optimizer, criterion, devic
     return running_loss / len(dataloader), all_labels, all_preds
 
 @torch.no_grad()
-def evaluate(classifier, dataloader, backend, criterion, device):
+def evaluate(classifier, dataloader, backend, criterion, device, use_features=False):
     classifier.eval()
     running_loss = 0.0
     all_scores = []
@@ -69,12 +68,16 @@ def evaluate(classifier, dataloader, backend, criterion, device):
     all_labels = []
     
     for batch in tqdm(dataloader, desc="Evaluating", leave=False):
-        img_paths = batch["image_path"]
-        texts = batch["text"]
         labels = batch["label"].to(device).float().unsqueeze(1)
         
-        img_emb = backend.encode_images(img_paths, batch_size=len(img_paths)).to(device)
-        text_emb = backend.encode_texts(texts, batch_size=len(texts)).to(device)
+        if use_features:
+            img_emb = batch["img_emb"].to(device)
+            text_emb = batch["text_emb"].to(device)
+        else:
+            img_paths = batch["image_path"]
+            texts = batch["text"]
+            img_emb = backend.encode_images(img_paths, batch_size=len(img_paths)).to(device)
+            text_emb = backend.encode_texts(texts, batch_size=len(texts)).to(device)
         
         logits = classifier(img_emb, text_emb)
         loss = criterion(logits, labels)
@@ -104,17 +107,36 @@ def main(args):
     train_records = load_classification_records(args.train_json, args.image_root, limit=args.limit)
     test_records = load_classification_records(args.test_json, args.image_root, limit=args.limit)
     
-    # We use a custom version of the dataset that returns paths for the CLIP backend
-    class PathDataset(MemeCapClassificationDataset):
+    # Dataset Mapping
+    class FeatureDataset(MemeCapClassificationDataset):
+        def __init__(self, records, feature_dir=None):
+            super().__init__(records)
+            self.feature_dir = feature_dir
+            if feature_dir:
+                with open(os.path.join(feature_dir, "text_mapping.json"), "r") as f:
+                    self.text_mapping = json.load(f)
+
         def __getitem__(self, idx):
             sample = self.samples[idx]
+            if self.feature_dir:
+                img_path = os.path.join(self.feature_dir, "images", f"{sample.image_fname}.pt")
+                t_hash = self.text_mapping[sample.text]
+                text_path = os.path.join(self.feature_dir, "texts", f"{t_hash}.pt")
+                return {
+                    "img_emb": torch.load(img_path, map_location="cpu"),
+                    "text_emb": torch.load(text_path, map_location="cpu"),
+                    "label": sample.label
+                }
             return {"image_path": str(sample.image_path), "text": sample.text, "label": sample.label}
             
-    train_dataset = PathDataset(train_records)
-    test_dataset = PathDataset(test_records)
+    train_dataset = FeatureDataset(train_records, feature_dir=args.feature_dir)
+    test_dataset = FeatureDataset(test_records, feature_dir=args.feature_dir)
     
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=args.eval_batch_size, shuffle=False)
+    
+    # Save args
+    save_json(os.path.join(run_dir, "args.json"), vars(args))
     
     # CLIP Backend (Frozen)
     backend = OpenCLIPBackend(args.model_name, args.pretrained, device)
@@ -128,24 +150,47 @@ def main(args):
     best_f1 = -1
     history = {"train_loss": [], "test_metrics": []}
     
+    # Logging
+    log_file = open(os.path.join(run_dir, "train.log"), "w")
+    def log(msg):
+        print(msg)
+        log_file.write(msg + "\n")
+        log_file.flush()
+        
+    log(f"Starting training at {timestamp}")
+    log(f"Args: {vars(args)}")
+    
     for epoch in range(1, args.epochs + 1):
-        print(f"\n--- Epoch {epoch}/{args.epochs} ---")
-        avg_train_loss, _, _ = train_one_epoch(classifier, train_loader, backend, optimizer, criterion, device)
-        avg_test_loss, metrics = evaluate(classifier, test_loader, backend, criterion, device)
+        log(f"\n--- Epoch {epoch}/{args.epochs} ---")
+        use_features = args.feature_dir is not None
+        avg_train_loss, _, _ = train_one_epoch(classifier, train_loader, backend, optimizer, criterion, device, use_features=use_features)
+        avg_test_loss, metrics = evaluate(classifier, test_loader, backend, criterion, device, use_features=use_features)
         
         history["train_loss"].append(avg_train_loss)
         history["test_metrics"].append(metrics)
         
-        print(f"Train Loss: {avg_train_loss:.4f} | Test Loss: {avg_test_loss:.4f}")
-        print_classification_report("Test", metrics)
+        log(f"Train Loss: {avg_train_loss:.4f} | Test Loss: {avg_test_loss:.4f}")
+        for k, v in metrics.items():
+            log(f"Test {k}: {v:.4f}")
+            
+        # Save per-epoch checkpoint
+        epoch_path = os.path.join(run_dir, f"epoch_{epoch}.pt")
+        save_checkpoint(epoch_path, classifier, optimizer, None, epoch, metrics["f1"])
         
+        # Save best checkpoint
         if metrics["f1"] > best_f1:
             best_f1 = metrics["f1"]
-            ckpt_path = os.path.join(run_dir, "best_classifier.pt")
-            save_checkpoint(ckpt_path, classifier, optimizer, None, epoch, best_f1)
-            print(f"[*] Saved new best model to {ckpt_path}")
+            best_path = os.path.join(run_dir, "best_classifier.pt")
+            save_checkpoint(best_path, classifier, optimizer, None, epoch, best_f1)
+            log(f"[*] Saved new best model (F1: {best_f1:.4f})")
+            
+        # Save last checkpoint
+        last_path = os.path.join(run_dir, "last_classifier.pt")
+        save_checkpoint(last_path, classifier, optimizer, None, epoch, metrics["f1"])
             
         save_json(os.path.join(run_dir, "history.json"), history)
+        
+    log_file.close()
 
 if __name__ == "__main__":
     import numpy as np
@@ -168,6 +213,7 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", type=str, default=None, help="cpu, cuda, or mps")
+    parser.add_argument("--feature_dir", type=str, default=None, help="Path to pre-extracted CLIP features")
     
     args = parser.parse_args()
     main(args)
