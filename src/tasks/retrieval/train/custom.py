@@ -201,7 +201,7 @@ if __name__ == "__main__":
     parser.add_argument("--train_json", type=str, default="data/memes-trainval.json")
     parser.add_argument("--test_json", type=str, default="data/memes-test.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--output_dir", type=str, default="outputs/custom_models")
+    parser.add_argument("--output_dir", type=str, default="outputs/custom")
 
     parser.add_argument("--image_size", type=int, default=224)
     parser.add_argument("--max_text_len", type=int, default=40)

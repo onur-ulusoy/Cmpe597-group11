@@ -11,7 +11,8 @@ class LoRAOpenCLIPBackend(OpenCLIPBackend):
         super().__init__(model_name, pretrained, device)
         print(f"Loading LoRA Adapter from: {checkpoint_path}")
         
-        self.model = PeftModel.from_pretrained(self.model, checkpoint_path)
+        checkpoint_path = os.path.abspath(checkpoint_path)
+        self.model = PeftModel.from_pretrained(self.model, checkpoint_path, local_files_only=True)
         self.model.to(device)
         self.model.eval()
 

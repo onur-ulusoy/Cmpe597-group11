@@ -65,7 +65,7 @@ class MemeCapFinetuneDataset(Dataset):
 def train(args):
     set_seed(42)
     # --- 1. Automated Directory Setup ---
-    base_save_dir = os.path.join("outputs", f"finetune_{args.task}")
+    base_save_dir = os.path.join("outputs", "finetune", args.task)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = os.path.join(base_save_dir, timestamp)
     os.makedirs(run_dir, exist_ok=True)

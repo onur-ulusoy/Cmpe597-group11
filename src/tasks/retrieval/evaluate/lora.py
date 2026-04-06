@@ -72,7 +72,7 @@ def main(args):
     ckpt_t1 = args.ckpt_type1
     if not ckpt_t1:
         try:
-            ckpt_t1 = get_latest_checkpoint("outputs/finetune_type1")
+            ckpt_t1 = get_latest_checkpoint("outputs/finetune/type1")
         except:
             ckpt_t1 = None
     
@@ -87,7 +87,7 @@ def main(args):
     ckpt_t2 = args.ckpt_type2
     if not ckpt_t2:
         try:
-            ckpt_t2 = get_latest_checkpoint("outputs/finetune_type2")
+            ckpt_t2 = get_latest_checkpoint("outputs/finetune/type2")
         except:
             ckpt_t2 = None
         
