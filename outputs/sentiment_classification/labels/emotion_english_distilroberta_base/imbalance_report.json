@@ -1,0 +1,62 @@
+{
+    "train": {
+        "anger": {
+            "count": 380,
+            "percentage": 6.525845783960158
+        },
+        "neutral": {
+            "count": 3174,
+            "percentage": 54.50798557444616
+        },
+        "sadness": {
+            "count": 423,
+            "percentage": 7.2642967542503865
+        },
+        "disgust": {
+            "count": 1124,
+            "percentage": 19.302764897818996
+        },
+        "joy": {
+            "count": 307,
+            "percentage": 5.272196462304654
+        },
+        "fear": {
+            "count": 233,
+            "percentage": 4.001373862270308
+        },
+        "surprise": {
+            "count": 182,
+            "percentage": 3.125536664949339
+        }
+    },
+    "test": {
+        "joy": {
+            "count": 37,
+            "percentage": 6.618962432915922
+        },
+        "neutral": {
+            "count": 292,
+            "percentage": 52.23613595706619
+        },
+        "sadness": {
+            "count": 47,
+            "percentage": 8.407871198568873
+        },
+        "anger": {
+            "count": 45,
+            "percentage": 8.050089445438283
+        },
+        "disgust": {
+            "count": 105,
+            "percentage": 18.783542039355993
+        },
+        "fear": {
+            "count": 16,
+            "percentage": 2.862254025044723
+        },
+        "surprise": {
+            "count": 17,
+            "percentage": 3.041144901610018
+        }
+    }
+}
