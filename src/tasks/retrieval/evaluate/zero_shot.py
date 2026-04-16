@@ -147,7 +147,7 @@ def build_parser():
 
     parser.add_argument("--test_json", type=str, default="data/memes-test.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--output_dir", type=str, default="outputs/zero_shot")
+    parser.add_argument("--output_dir", type=str, default="outputs/retrieval/zero_shot")
     parser.add_argument("--limit", type=int, default=None)
 
     parser.add_argument("--model_family", type=str, required=True, choices=["openclip", "siglip"])

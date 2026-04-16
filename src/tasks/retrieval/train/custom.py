@@ -14,7 +14,7 @@ from src.common.metrics import compute_recall_metrics
 from src.common.utils import set_seed, save_json, save_checkpoint, load_checkpoint
 from src.models.custom.data_utils import MemeCapCustomDataset, build_image_transform, build_vocab_from_records
 from src.models.custom.loss import total_loss
-from src.models.custom.architecture import MatchingModel
+from src.models.custom.cross_modal_retrieval_model import MatchingModel
 
 def get_device():
     if torch.cuda.is_available(): return "cuda"
