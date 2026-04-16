@@ -2,6 +2,34 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class SymmetricContrastiveLoss(nn.Module):
+    def __init__(self, label_smoothing: float = 0.0):
+        super().__init__()
+        self.label_smoothing = label_smoothing
+
+    def forward(self, image_emb, text_emb, logit_scale):
+        logits_per_image = logit_scale * (image_emb @ text_emb.T)
+        logits_per_text = logits_per_image.T
+
+        targets = torch.arange(image_emb.size(0), device=image_emb.device)
+
+        loss_i = F.cross_entropy(
+            logits_per_image,
+            targets,
+            label_smoothing=self.label_smoothing,
+        )
+        loss_t = F.cross_entropy(
+            logits_per_text,
+            targets,
+            label_smoothing=self.label_smoothing,
+        )
+
+        loss = 0.5 * (loss_i + loss_t)
+
+        return loss, {
+            "loss_contrastive": loss.detach().item(),
+        }
+
 class ResidualBlock(nn.Module):
     def __init__(self, in_ch: int, out_ch: int, stride: int = 1, dropout: float = 0.0):
         super().__init__()
@@ -30,7 +58,6 @@ class ResidualBlock(nn.Module):
         out = out + identity
         out = F.gelu(out)
         return out
-
 
 class ImageEncoderCNN(nn.Module):
     def __init__(self, feat_dim: int = 256, dropout: float = 0.05):
@@ -78,7 +105,6 @@ class ImageEncoderCNN(nn.Module):
         x = self.proj(x)
         return x
 
-
 class TextEncoderGRU(nn.Module):
     def __init__(
         self, vocab_size: int, pad_idx: int, word_dim: int = 256, 
@@ -120,7 +146,6 @@ class TextEncoderGRU(nn.Module):
         pooled = self.proj(pooled)
         return pooled
 
-
 class FeatureFusion(nn.Module):
     def __init__(self, feat_dim: int = 256):
         super().__init__()
@@ -133,7 +158,6 @@ class FeatureFusion(nn.Module):
     def forward(self, img_feat, title_feat):
         fused = torch.cat([img_feat, title_feat], dim=-1)
         return self.proj(fused)
-
 
 class MatchingModel(nn.Module):
     def __init__(
@@ -164,7 +188,6 @@ class MatchingModel(nn.Module):
     def encode_meme(self, images, title_ids=None, title_mask=None, normalize: bool = True):
         feat = self.image_encoder(images)
         
-        # If Type 2, extract title and fuse
         if self.model_type == "type2" and title_ids is not None:
             title_feat = self.title_encoder(title_ids, title_mask)
             feat = self.fusion(feat, title_feat)

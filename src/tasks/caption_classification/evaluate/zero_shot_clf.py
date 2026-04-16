@@ -94,7 +94,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--test_json", type=str, default="data/memes-test.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--output_dir", type=str, default="outputs/classification/zero_shot")
+    parser.add_argument("--output_dir", type=str, default="outputs/caption_classification/zero_shot")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--openclip_model_name", type=str, default="ViT-L-14")
     parser.add_argument("--openclip_pretrained", type=str, default="laion2b_s32b_b82k")

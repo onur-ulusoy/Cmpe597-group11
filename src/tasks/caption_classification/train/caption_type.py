@@ -15,7 +15,7 @@ from src.common.classification_dataset import load_classification_records, MemeC
 from src.common.classification_metrics import compute_classification_metrics, print_classification_report
 from src.common.utils import set_seed, save_json, save_checkpoint
 from src.models.pretrained.openclip import OpenCLIPBackend
-from src.models.custom.classification_model import MemeClassificationModel
+from src.models.custom.caption_classification_model import MemeClassificationModel
 
 def get_device(preference=None):
     if preference: return preference
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     parser.add_argument("--train_json", type=str, default="data/memes-trainval.json")
     parser.add_argument("--test_json", type=str, default="data/memes-test.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--output_dir", type=str, default="outputs/classification/train")
+    parser.add_argument("--output_dir", type=str, default="outputs/caption_classification/train")
     
     parser.add_argument("--model_name", type=str, default="ViT-L-14")
     parser.add_argument("--pretrained", type=str, default="laion2b_s32b_b82k")

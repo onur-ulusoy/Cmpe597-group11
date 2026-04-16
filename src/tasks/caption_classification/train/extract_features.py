@@ -106,7 +106,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    from src.tasks.classification.train.caption_type import get_device
+    from src.tasks.caption_classification.train.caption_type import get_device
     device = get_device(args.device)
     backend = OpenCLIPBackend(args.model_name, args.pretrained, device)
     

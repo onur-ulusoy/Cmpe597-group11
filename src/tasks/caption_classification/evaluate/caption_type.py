@@ -12,7 +12,7 @@ from src.common.classification_dataset import load_classification_records, MemeC
 from src.common.classification_metrics import compute_classification_metrics, print_classification_report
 from src.common.utils import load_checkpoint, save_json
 from src.models.pretrained.openclip import OpenCLIPBackend
-from src.models.custom.classification_model import MemeClassificationModel
+from src.models.custom.caption_classification_model import MemeClassificationModel
 
 def get_device():
     if torch.cuda.is_available(): return "cuda"
