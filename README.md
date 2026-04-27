@@ -174,8 +174,19 @@ To overcome the limitations of zero-shot alignment, we implemented a **Late Fusi
 
 ## 5. Task 2.3: Meme Sentiment Classification
 
-*(Under Development)*
-This task involves classifying the emotion/sentiment of a meme based on its visual and textual content.
+This task involves classifying the emotion of a meme. Unlike Task 2.2, which was a binary literal/metaphorical distinction, this is a **multiclass classification problem**.
+
+### (a) Multiclass Emotion Annotation
+
+Since the raw dataset does not provide emotion labels, we first generated "silver" ground truth using a pretrained transformer model.
+
+*   **Model Selection & Multi-Model Analysis**: We explored two different pretrained transformers to determine the best labeling strategy. While we tested `twitter-roberta-base-sentiment-latest` for basic 3-class sentiment, we primarily utilized `emotion-english-distilroberta-base` to map meme captions to **7 granular categories**: *Anger, Disgust, Fear, Joy, Neutral, Sadness, and Surprise*. Both models showed high consistency, particularly regarding the high prevalence of neutral labels (~55%).
+*   **Class Imbalance**: The resulting dataset is heavily imbalanced, with **Neutral (54.5%)** and **Disgust (19.3%)** being the dominant classes. This "Neutral Bias" is expected; many meme captions are formulated as descriptive statements, which text-only models perceive as neutral, even when the visual context implies irony or strong emotion.
+*   **Manual Validation & Noise Report**: We manually verified a random subset of 20 samples. The automated labels showed **80% alignment** with human intuition. The observed 20% "noise" primarily involves the model defaulting to 'Neutral' for complex humorous captions that require visual context to decode. Detailed comparisons across models and human judgment can be found in the [Annotation Comparison Report](outputs/sentiment_classification/labels/comparison_report.md).
+
+### (b) Multimodal Training & Fusion
+*(Currently Under Implementation)*
+We are developing a multiclass extension of our Late Fusion MLP architecture to predict these 7 emotional categories.
 
 ---
 
