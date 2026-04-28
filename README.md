@@ -146,8 +146,6 @@ We've established the classification framework and established a zero-shot simil
 #### 1. Formulating the Task
 We formulated this task as a **binary classification problem**. Positive samples (Label 1) are pairs of (Meme Image, Meme Caption), and negative samples (Label 0) are pairs of (Meme Image, Literal Image Caption).
 
-We formulated this task as a **binary classification problem**. Positive samples (Label 1) are pairs of (Meme Image, Meme Caption), and negative samples (Label 0) are pairs of (Meme Image, Literal Image Caption).
-
 **Selected Metrics:**
 *   **Accuracy:** Overall percentage of correctly classified pairs.
 *   **F1-Score:** The harmonic mean of precision and recall. This is our primary metric as it balances the model's ability to find all metaphorical captions (recall) without misclassifying literal ones (precision).
@@ -229,6 +227,16 @@ We are developing a multiclass extension of our Late Fusion MLP architecture to 
 | **Ablation: Advanced Fusion** | 0.983 | **0.999** | 0.978 | 0.989 | 0.999 |
 | **Ablation: Adv. Fusion + LayerNorm** | 0.983 | **0.999** | 0.978 | 0.989 | 0.999 |
 | **Final Selected Model (LayerNorm)** | **0.989** | 0.994 | **0.991** | **0.993** | **0.999** |
+
+### Task 2.3: Meme Sentiment Classification (7-Class)
+
+*(Note: Training is currently in progress. This table will be populated upon the completion of Tasks 2.3.b and 2.3.c.)*
+
+| Architecture / Modality | Strategy | Accuracy | Macro F1-Score |
+| :--- | :--- | :--- | :--- |
+| **Unimodal Baseline** | Image-Only MLP (CLIP Visual) | *TBD* | *TBD* |
+| **Unimodal Baseline** | Text-Only MLP (CLIP Text) | *TBD* | *TBD* |
+| **Multimodal Custom** | Late Fusion MLP (Image + Text) | *TBD* | *TBD* |
 
 ---
 
