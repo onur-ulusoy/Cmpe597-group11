@@ -7,6 +7,7 @@ from tqdm import tqdm
 import torch
 from transformers import pipeline
 from pathlib import Path
+import shutil
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -18,8 +19,12 @@ def save_json(data, path):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 def save_markdown_report(samples, image_root, output_path):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    rel_prefix = os.path.relpath(image_root, start=os.path.dirname(output_path))
+    out_dir = os.path.dirname(output_path)
+    os.makedirs(out_dir, exist_ok=True)
+    
+    # Create a subfolder to hold ONLY the sampled images for GitHub rendering
+    sample_img_dir = os.path.join(out_dir, "sampled_images")
+    os.makedirs(sample_img_dir, exist_ok=True)
     
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("# Manual Quality Check (Random Samples)\n\n")
@@ -30,11 +35,20 @@ def save_markdown_report(samples, image_root, output_path):
             label = item.get("sentiment_label", "")
             score = item.get("sentiment_score", 0.0)
             
-            img_path = os.path.join(rel_prefix, img_fname).replace("\\", "/")
+            # Paths for copying the image
+            src_img_path = os.path.join(image_root, img_fname)
+            dst_img_path = os.path.join(sample_img_dir, img_fname)
+            
+            # Copy the image from the ignored data/ folder to the tracked outputs/ folder
+            if os.path.exists(src_img_path):
+                shutil.copy2(src_img_path, dst_img_path)
+            
+            # The path inside the Markdown file is now just relative to the subfolder
+            md_img_path = f"sampled_images/{img_fname}"
             
             f.write(f"### {i+1}. Predicted Label: **{label}** (Score: {score:.4f})\n")
             f.write(f"- **Meme Text**: {text}\n\n")
-            f.write(f"<img src='{img_path}' width='400'>\n\n")
+            f.write(f"<img src='{md_img_path}' width='400'>\n\n")
             f.write("---\n\n")
 
 def main(args):
