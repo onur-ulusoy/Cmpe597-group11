@@ -7,21 +7,21 @@
 
 ---
 
-### 2. Predicted VLM Emotion: **Sadness**
+### 2. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster trying to convey that the difference of high school and master's.
 
 <img src='sampled_images/memes_tm37lm.png' width='400'>
 
 ---
 
-### 3. Predicted VLM Emotion: **Disgust**
+### 3. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster is trying to convey that the BMW riding his tail should have gone around him the whole time instead of tailing him.
 
 <img src='sampled_images/memes_yrt7wo.png' width='400'>
 
 ---
 
-### 4. Predicted VLM Emotion: **Sadness**
+### 4. Predicted VLM Emotion: **Disgust**
 - **Meme Text**: Meme poster is amused by Holocaust memes on their phone and perhaps this is why they don't have a girlfriend.
 
 <img src='sampled_images/memes_zbsjan.png' width='400'>
@@ -35,21 +35,21 @@
 
 ---
 
-### 6. Predicted VLM Emotion: **Sadness**
+### 6. Predicted VLM Emotion: **Disgust**
 - **Meme Text**: Meme poster is tired of seeing Reddit posts about Elon Musk.
 
 <img src='sampled_images/memes_ymqy2g.png' width='400'>
 
 ---
 
-### 7. Predicted VLM Emotion: **Sadness**
+### 7. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster has only three different moods. 
 
 <img src='sampled_images/memes_ykarkp.png' width='400'>
 
 ---
 
-### 8. Predicted VLM Emotion: **Sadness**
+### 8. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: The poster thinks it is typical for parents to not pay too much attention to the middle child, whereas the eldest and the youngest get more attention.
 
 <img src='sampled_images/memes_yd12q3.png' width='400'>
@@ -91,7 +91,7 @@
 
 ---
 
-### 14. Predicted VLM Emotion: **Neutral**
+### 14. Predicted VLM Emotion: **Joy**
 - **Meme Text**: Meme poster is trying to convey that Pennsylvania will become the most iconic state.
 
 <img src='sampled_images/memes_jpupi3.png' width='400'>
@@ -105,14 +105,14 @@
 
 ---
 
-### 16. Predicted VLM Emotion: **Sadness**
+### 16. Predicted VLM Emotion: **Anger**
 - **Meme Text**: Meme poster wants to make a bad joke and don't care who will resist them.
 
 <img src='sampled_images/memes_yvcgm4.png' width='400'>
 
 ---
 
-### 17. Predicted VLM Emotion: **Sadness**
+### 17. Predicted VLM Emotion: **Anger**
 - **Meme Text**: The meme poster punishes his friend who came late to the party.
 
 <img src='sampled_images/memes_yu2v36.png' width='400'>
@@ -126,7 +126,7 @@
 
 ---
 
-### 19. Predicted VLM Emotion: **Sadness**
+### 19. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster wants YouTube to stop translating their videos from English.
 
 <img src='sampled_images/memes_l5b0ys.png' width='400'>
@@ -147,7 +147,7 @@
 
 ---
 
-### 22. Predicted VLM Emotion: **Sadness**
+### 22. Predicted VLM Emotion: **Joy**
 - **Meme Text**: Meme poster feels strongly about creating their character and put 50 hours into it besides playing the main and side quests.
 
 <img src='sampled_images/memes_yy42g5.png' width='400'>
@@ -175,14 +175,14 @@
 
 ---
 
-### 26. Predicted VLM Emotion: **Sadness**
+### 26. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster trying to convey that the difference between money needs of men and women.
 
 <img src='sampled_images/memes_yj86kg.png' width='400'>
 
 ---
 
-### 27. Predicted VLM Emotion: **Sadness**
+### 27. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster is trying to convey that Walt Disney designs a war appropriate version of Mickey for the kids.
 
 <img src='sampled_images/memes_zax6ko.png' width='400'>
@@ -210,7 +210,7 @@
 
 ---
 
-### 31. Predicted VLM Emotion: **Sadness**
+### 31. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster is trying to convey that they think Reddit is like Facebook, but for Generation Z.
 
 <img src='sampled_images/memes_yuy66o.png' width='400'>
@@ -231,7 +231,7 @@
 
 ---
 
-### 34. Predicted VLM Emotion: **Disgust**
+### 34. Predicted VLM Emotion: **Surprise**
 - **Meme Text**: The meme poster mocked a random user in his comment section by stating that the random user is a hippo too.
 
 <img src='sampled_images/memes_z1e0cu.png' width='400'>
@@ -252,14 +252,14 @@
 
 ---
 
-### 37. Predicted VLM Emotion: **Surprise**
+### 37. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster found old Reddit post and think it's more insightful than stuff posted now.
 
 <img src='sampled_images/memes_zccz5c.png' width='400'>
 
 ---
 
-### 38. Predicted VLM Emotion: **Sadness**
+### 38. Predicted VLM Emotion: **Joy**
 - **Meme Text**: meme poster is in a rush to get home to watch Dragonball Z. 
 
 <img src='sampled_images/memes_yfl4i8.png' width='400'>
@@ -273,7 +273,7 @@
 
 ---
 
-### 40. Predicted VLM Emotion: **Disgust**
+### 40. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster is trying to convey that there are people that are anal about population estimates like so
 
 <img src='sampled_images/memes_yvd3es.png' width='400'>
@@ -301,7 +301,7 @@
 
 ---
 
-### 44. Predicted VLM Emotion: **Sadness**
+### 44. Predicted VLM Emotion: **Joy**
 - **Meme Text**: Meme poster is trying to teach some important speech for people.
 
 <img src='sampled_images/memes_yjng9v.png' width='400'>
@@ -315,21 +315,21 @@
 
 ---
 
-### 46. Predicted VLM Emotion: **Surprise**
+### 46. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster is trying to convey that Foreigners are dazzled by American culture.
 
 <img src='sampled_images/memes_ypvcun.png' width='400'>
 
 ---
 
-### 47. Predicted VLM Emotion: **Sadness**
+### 47. Predicted VLM Emotion: **Neutral**
 - **Meme Text**: Meme poster is trying to convey that children now a days has more will power and some of them have not.
 
 <img src='sampled_images/memes_qzxhq1.png' width='400'>
 
 ---
 
-### 48. Predicted VLM Emotion: **Sadness**
+### 48. Predicted VLM Emotion: **Joy**
 - **Meme Text**: Meme poster is making a joke about Bruce Wayne's billionaire status as compared to the Joker's.
 
 <img src='sampled_images/memes_kz9ubb.png' width='400'>

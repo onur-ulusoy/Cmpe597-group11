@@ -14,7 +14,7 @@
 
 ---
 
-### 3. Predicted VLM Emotion: **Disgust**
+### 3. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster is trying to convey that the BMW riding his tail should have gone around him the whole time instead of tailing him.
 
 <img src='sampled_images/memes_yrt7wo.png' width='400'>
@@ -91,7 +91,7 @@
 
 ---
 
-### 14. Predicted VLM Emotion: **Neutral**
+### 14. Predicted VLM Emotion: **Joy**
 - **Meme Text**: Meme poster is trying to convey that Pennsylvania will become the most iconic state.
 
 <img src='sampled_images/memes_jpupi3.png' width='400'>
@@ -112,7 +112,7 @@
 
 ---
 
-### 17. Predicted VLM Emotion: **Sadness**
+### 17. Predicted VLM Emotion: **Anger**
 - **Meme Text**: The meme poster punishes his friend who came late to the party.
 
 <img src='sampled_images/memes_yu2v36.png' width='400'>
@@ -140,7 +140,7 @@
 
 ---
 
-### 21. Predicted VLM Emotion: **Disgust**
+### 21. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Poster is conveying that Americans are outraged when other countries spy on them but not when the government doeas.
 
 <img src='sampled_images/memes_ylah1l.png' width='400'>
@@ -203,7 +203,7 @@
 
 ---
 
-### 30. Predicted VLM Emotion: **Disgust**
+### 30. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster is trying to convey that it's weird realizing that girls poop.
 
 <img src='sampled_images/memes_z098d0.png' width='400'>
@@ -231,14 +231,14 @@
 
 ---
 
-### 34. Predicted VLM Emotion: **Disgust**
+### 34. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: The meme poster mocked a random user in his comment section by stating that the random user is a hippo too.
 
 <img src='sampled_images/memes_z1e0cu.png' width='400'>
 
 ---
 
-### 35. Predicted VLM Emotion: **Disgust**
+### 35. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster is trying to convey that they disagree with an opinion regarding the video game God of War winning game of the year over red read redemption 2
 
 <img src='sampled_images/memes_yokbbl.png' width='400'>
@@ -252,7 +252,7 @@
 
 ---
 
-### 37. Predicted VLM Emotion: **Surprise**
+### 37. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster found old Reddit post and think it's more insightful than stuff posted now.
 
 <img src='sampled_images/memes_zccz5c.png' width='400'>
@@ -273,28 +273,28 @@
 
 ---
 
-### 40. Predicted VLM Emotion: **Disgust**
+### 40. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster is trying to convey that there are people that are anal about population estimates like so
 
 <img src='sampled_images/memes_yvd3es.png' width='400'>
 
 ---
 
-### 41. Predicted VLM Emotion: **Sadness**
+### 41. Predicted VLM Emotion: **Anger**
 - **Meme Text**: Meme poster is mad because his friend is ignoring him for his new girlfriend.
 
 <img src='sampled_images/memes_yrugbo.png' width='400'>
 
 ---
 
-### 42. Predicted VLM Emotion: **Disgust**
+### 42. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: The poster thinks that the gaming giant Nintendo is destroying the lives of children.
 
 <img src='sampled_images/memes_yojze6.png' width='400'>
 
 ---
 
-### 43. Predicted VLM Emotion: **Fear**
+### 43. Predicted VLM Emotion: **Surprise**
 - **Meme Text**: Meme poster is trying to convey that Instead of trying to make the Joker traditionally scary, it would be more terrifying to make him Borat. 
 
 <img src='sampled_images/memes_yez083.png' width='400'>
@@ -315,7 +315,7 @@
 
 ---
 
-### 46. Predicted VLM Emotion: **Surprise**
+### 46. Predicted VLM Emotion: **Sadness**
 - **Meme Text**: Meme poster is trying to convey that Foreigners are dazzled by American culture.
 
 <img src='sampled_images/memes_ypvcun.png' width='400'>

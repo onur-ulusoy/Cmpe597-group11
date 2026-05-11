@@ -115,11 +115,27 @@ def main(args):
                 continue
 
             prompt = (
-                f"USER: <image>\nYou are an expert at understanding internet memes. "
-                f"Look at this meme image and read its caption: '{text}'. "
-                f"Classify the intended emotion of this meme into EXACTLY ONE of these categories: "
+                f"USER: <image>\nYou are an AI that classifies the true emotional intent of internet memes. "
+                f"Memes often use irony. Here are examples of how to classify them:\n\n"
+                f"Example 1:\n"
+                f"Caption: 'Me looking at my bank account after buying expensive coffee.'\n"
+                f"Image: A crying person.\n"
+                f"Intent: This is self-deprecating humor.\n"
+                f"Emotion: Joy\n\n"
+                f"Example 2:\n"
+                f"Caption: 'When the teacher assigns homework on Friday.'\n"
+                f"Image: A character smiling while everything is on fire.\n"
+                f"Intent: This expresses frustration and sarcasm.\n"
+                f"Emotion: Disgust\n\n"
+                f"Example 3:\n"
+                f"Caption: 'I actually failed my final exam today.'\n"
+                f"Image: A genuinely sad cat.\n"
+                f"Intent: This is literal and depressing.\n"
+                f"Emotion: Sadness\n\n"
+                f"Now, look at the provided meme image and read its caption: '{text}'. "
+                f"Classify its true intended emotion into EXACTLY ONE of these categories: "
                 f"Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise. "
-                f"Output only the category name and nothing else.\nASSISTANT:"
+                f"Output ONLY the category name.\nASSISTANT:"
             )
 
             inputs = processor(text=prompt, images=raw_image, return_tensors="pt").to(model.device)
