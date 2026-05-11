@@ -179,21 +179,53 @@ Based on the experiments, utilizing **LayerNorm** with our initial simple concat
 
 ## 5. Task 2.3: Meme Sentiment Classification
 
-This task involves classifying the emotion of a meme. Unlike Task 2.2, which was a binary literal/metaphorical distinction, this is a **multiclass classification problem**.
+This task involves classifying the emotion of a meme into one of seven granular categories: *Anger, Disgust, Fear, Joy, Neutral, Sadness, and Surprise*.
 
-### (a) Multiclass Emotion Annotation
+### (a) Multiclass Emotion Annotation (Label Generation)
 
-Since the raw dataset does not provide emotion labels, we first generated "silver" ground truth using a pretrained transformer model.
+Since the raw dataset lacked emotion labels, we implemented an iterative "Silver Standard" labeling pipeline to overcome the limitations of text-only analysis.
 
-*   **Model Selection & Multi-Model Analysis**: We explored two different pretrained transformers to determine the best labeling strategy. While we tested `twitter-roberta-base-sentiment-latest` for basic 3-class sentiment, we primarily utilized `emotion-english-distilroberta-base` to map meme captions to **7 granular categories**: *Anger, Disgust, Fear, Joy, Neutral, Sadness, and Surprise*. Both models showed high consistency, particularly regarding the high prevalence of neutral labels (~55%).
-*   **Class Imbalance**: The resulting dataset is heavily imbalanced, with **Neutral (54.5%)** and **Disgust (19.3%)** being the dominant classes. This "Neutral Bias" is expected; many meme captions are formulated as descriptive statements, which text-only models perceive as neutral, even when the visual context implies irony or strong emotion.
-*   **Manual Validation & Noise Report**: This is a known limitation of text-only models when applied to internet memes: meme captions are highly contextual, sarcastic, and rely heavily on the visual component to deliver the emotional punchline. A plain text caption like "Me studying at 3 AM" might be classified as Neutral by a text model, whereas the accompanying visual dictates whether the intended emotion is despair, anger, or humor. Detailed comparisons across models and human judgment can be found in the [Annotation Comparison Report](outputs/sentiment_classification/labels/comparison_report.md).
+* **From Text-Only to VLM**: Initial experiments with `emotion-english-distilroberta-base` resulted in a severe **Neutral Bias (~55%)**, as text models could not perceive visual irony. We transitioned to Vision-Language Models (VLMs) to provide visual context.
+* **Overcoming Visual Literalism**: Early VLM attempts (LLaVA-1.5-7B) suffered from "Visual Literalism," where the model interpreted ironic templates (e.g., a crying kedi) as literal Sadness. 
+* **Final Strategy (Qwen-VL-Chat)**: We utilized **Qwen-VL-Chat** with **Few-Shot Sarcasm-Aware Prompting**. By providing examples of how visual cues (crying faces) often map to humor (Joy) in meme culture, we achieved a more balanced and semantically accurate distribution: **Joy (43.2%)**, **Neutral (22.3%)**, and **Surprise (16.4%)**, effectively cracking the code on internet irony.
 
-This establishes the baseline necessity for the multimodal sentiment architectures developed in subsequent steps.
+### (b) Unimodal Baselines
+We established two performance baselines using MLP classifiers (LayerNorm + GELU) trained on frozen **CLIP-ViT-L/14** embeddings:
+1.  **Image-Only**: Evaluates the emotional signal purely from visual features.
+2.  **Text-Only**: Evaluates the signal from meme captions/titles.
+Results indicated that text remains the primary carrier of sentiment, with the Image-Only model struggling due to the highly recycled and ambiguous nature of meme templates.
 
-### (b) Multimodal Training & Fusion
-*(Currently Under Implementation)*
-We are developing a multiclass extension of our Late Fusion MLP architecture to predict these 7 emotional categories.
+### (c) Multimodal Custom Architecture (Late Fusion)
+We implemented a **Late Fusion MLP** that concatenates visual and textual CLIP embeddings (1536-dimensional input). 
+* **Regularization Strategy**: To combat overfitting observed during early training, we implemented a robust regularization suite: **Dropout (0.5)**, **Label Smoothing (0.1)**, and **Weight Decay (1e-2)**.
+* **Modality Dominance Analysis**: Results showed "Text Dominance," where the multimodal model achieved performance close to the Text-Only baseline. This suggests that in meme sentiment, the visual component can sometimes act as "noise" when the template is emotionally ambiguous, a common characteristic in internet meme datasets.
+
+### Analysis of Design Choices in Task 2.3
+
+The development of the Meme Sentiment Classification task involved several critical design decisions aimed at overcoming the unique challenges of meme data (irony, recycled templates, and context-dependency).
+
+#### 1. Transition from LLaVA-1.5 to Qwen-VL-Chat
+Initial labeling attempts with LLaVA-1.5-7B resulted in "Visual Literalism." The model failed to grasp that a "crying face" or "angry expression" in a meme is often used ironically to convey humor (Joy). **Qwen-VL-Chat** was selected because of its superior performance in few-shot reasoning. By providing the model with "Sarcasm-Aware" examples, we successfully shifted the label distribution from literal descriptions to emotional intent.
+
+#### 2. CLIP Feature Pre-Extraction
+Rather than training end-to-end (which is computationally expensive), we utilized frozen **CLIP-ViT-L/14** encoders to pre-extract 768-dimensional visual and textual embeddings. 
+* **Efficiency**: This allowed the MLP models to be trained in seconds rather than hours.
+* **Consistency**: Using the same encoder as Task 2.1 and 2.2 ensures that our sentiment analysis is built upon a feature space that has already proven effective for cross-modal retrieval.
+
+#### 3. Late Fusion (Concatenation) Architecture
+We chose a **Late Fusion** approach, where the independent visual and textual vectors are concatenated into a single 1536-dimensional vector. 
+
+
+* **Rationale**: Late fusion allows the model to learn high-level interactions between the two modalities without the complexity of cross-attention mechanisms, serving as a robust benchmark for multimodal performance.
+
+#### 4. Regularization to Combat Overfitting
+During initial training, the Multimodal model reached a training loss of ~0.07 while test accuracy stagnated, indicating that the model was simply memorizing the "silver" labels. We implemented:
+* **High Dropout (0.5)**: To prevent reliance on specific high-dimensional CLIP features.
+* **Label Smoothing (0.1)**: To account for the inherent subjectivity and potential noise in AI-generated "silver" labels.
+* **Strong Weight Decay (1e-2)**: To constrain model complexity and improve generalization.
+
+#### 5. Modality Dominance Interpretation
+The final results indicated a "Text-Only" lead over the Multimodal model. We interpret this not as a model failure, but as **Modality Dominance**. In internet memes, the image is often a generic template (e.g., "The Rock" driving a car) that can represent dozens of conflicting emotions. The text caption acts as the "anchor" that provides the specific sentiment, while the visual component can sometimes act as statistical noise during the fusion process.
 
 ---
 
@@ -230,13 +262,11 @@ We are developing a multiclass extension of our Late Fusion MLP architecture to 
 
 ### Task 2.3: Meme Sentiment Classification (7-Class)
 
-*(Note: Training is currently in progress. This table will be populated upon the completion of Tasks 2.3.b and 2.3.c.)*
-
-| Architecture / Modality | Strategy | Accuracy | Macro F1-Score |
+| Architecture / Modality | Strategy / Configuration | Accuracy | Macro F1-Score |
 | :--- | :--- | :--- | :--- |
-| **Unimodal Baseline** | Image-Only MLP (CLIP Visual) | *TBD* | *TBD* |
-| **Unimodal Baseline** | Text-Only MLP (CLIP Text) | *TBD* | *TBD* |
-| **Multimodal Custom** | Late Fusion MLP (Image + Text) | *TBD* | *TBD* |
+| **Unimodal Baseline** | Image-Only MLP (CLIP Visual) | 0.4043 | 0.2725 |
+| **Unimodal Baseline** | Text-Only MLP (CLIP Text) | 0.5224 | **0.4251** |
+| **Multimodal Custom** | Late Fusion MLP (Regularized) | **0.5134** | 0.4211 |
 
 ---
 
@@ -249,7 +279,7 @@ We are developing a multiclass extension of our Late Fusion MLP architecture to 
     - [x] **2.2.a:** Evaluation Framework & Metrics
     - [x] **2.2.b:** Fusion Architectures Implementation
     - [x] **2.2.c:** Performance Comparison & Ablation
-- [/] **Task 2.3: Meme Sentiment Classification**
-    - [x] **2.3.a:** Label Generation & Class Imbalance Analysis
-    - [ ] **2.3.b:** Unimodal Baselines
-    - [ ] **2.3.c:** Custom Multimodal Architecture
+- [x] **Task 2.3: Meme Sentiment Classification**
+    - [x] **2.3.a:** Label Generation (Qwen-VL Few-Shot)
+    - [x] **2.3.b:** Unimodal Baselines (Image vs. Text)
+    - [x] **2.3.c:** Custom Multimodal Architecture (Late Fusion)
