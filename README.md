@@ -188,6 +188,7 @@ Since the raw dataset lacked emotion labels, we implemented an iterative "Silver
 * **From Text-Only to VLM**: Initial experiments with `emotion-english-distilroberta-base` resulted in a severe **Neutral Bias (~55%)**, as text models could not perceive visual irony. We transitioned to Vision-Language Models (VLMs) to provide visual context.
 * **Overcoming Visual Literalism**: Early VLM attempts (LLaVA-1.5-7B) suffered from "Visual Literalism," where the model interpreted ironic templates (e.g., a crying kedi) as literal Sadness. 
 * **Final Strategy (Qwen-VL-Chat)**: We utilized **Qwen-VL-Chat** with **Few-Shot Sarcasm-Aware Prompting**. By providing examples of how visual cues (crying faces) often map to humor (Joy) in meme culture, we achieved a more balanced and semantically accurate distribution: **Joy (43.2%)**, **Neutral (22.3%)**, and **Surprise (16.4%)**, effectively cracking the code on internet irony.
+* **Manual Quality Check & Comparison**: To validate annotation quality, we performed systematic manual checks on random subsets against human ground-truth. For a side-by-side comparative analysis of the six tested configurations (Text-only models, LLaVA-1.5 variants, and Qwen-VL-Chat) against human judgments, see the comprehensive [Annotation Comparison Report](outputs/sentiment_classification/labels/comparison_report.md).
 
 ### (b) Unimodal Baselines
 We established two performance baselines using MLP classifiers (LayerNorm + GELU) trained on frozen **CLIP-ViT-L/14** embeddings:
