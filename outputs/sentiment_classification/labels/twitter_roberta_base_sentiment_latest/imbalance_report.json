@@ -1,0 +1,30 @@
+{
+    "train": {
+        "negative": {
+            "count": 2180,
+            "percentage": 37.4377468658767
+        },
+        "positive": {
+            "count": 434,
+            "percentage": 7.4532028164176545
+        },
+        "neutral": {
+            "count": 3209,
+            "percentage": 55.10905031770565
+        }
+    },
+    "test": {
+        "positive": {
+            "count": 47,
+            "percentage": 8.407871198568873
+        },
+        "negative": {
+            "count": 239,
+            "percentage": 42.75491949910555
+        },
+        "neutral": {
+            "count": 273,
+            "percentage": 48.837209302325576
+        }
+    }
+}
