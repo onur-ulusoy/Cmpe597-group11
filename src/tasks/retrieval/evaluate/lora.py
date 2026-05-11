@@ -72,7 +72,7 @@ def main(args):
     ckpt_t1 = args.ckpt_type1
     if not ckpt_t1:
         try:
-            ckpt_t1 = get_latest_checkpoint("outputs/finetune/type1")
+            ckpt_t1 = get_latest_checkpoint("outputs/retrieval/finetune/type1")
         except:
             ckpt_t1 = None
     
@@ -81,13 +81,13 @@ def main(args):
         if metrics:
             results.append(("Fine-Tuned (Type 1)", "Image Only", metrics))
     else:
-        print("Skipping Type 1: No valid checkpoint found in outputs/finetune_type1")
+        print("Skipping Type 1: No valid checkpoint found in outputs/retrieval/finetune_type1")
 
     # Evaluate Type 2
     ckpt_t2 = args.ckpt_type2
     if not ckpt_t2:
         try:
-            ckpt_t2 = get_latest_checkpoint("outputs/finetune/type2")
+            ckpt_t2 = get_latest_checkpoint("outputs/retrieval/finetune/type2")
         except:
             ckpt_t2 = None
         
@@ -96,7 +96,7 @@ def main(args):
         if metrics:
             results.append(("Fine-Tuned (Type 2)", "Image + Title", metrics))
     else:
-        print("Skipping Type 2: No valid checkpoint found in outputs/finetune_type2")
+        print("Skipping Type 2: No valid checkpoint found in outputs/retrieval/finetune_type2")
 
     if not results:
         print("No models evaluated. Please train the models first.")

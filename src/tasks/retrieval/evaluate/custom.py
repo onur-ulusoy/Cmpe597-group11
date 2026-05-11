@@ -10,7 +10,7 @@ from src.common.dataset import load_memecap_records
 from src.common.utils import save_json, load_checkpoint
 from src.common.metrics import compute_recall_metrics
 from src.models.custom.data_utils import MemeCapCustomDataset, Vocab, build_image_transform
-from src.models.custom.architecture import MatchingModel
+from src.models.custom.cross_modal_retrieval_model import MatchingModel
 
 def get_device():
     if torch.cuda.is_available(): return "cuda"
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--test_json", type=str, default="data/memes-test.json")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--output_json", type=str, default="outputs/custom_models/eval_metrics.json")
+    parser.add_argument("--output_json", type=str, default="outputs/retrieval/custom/eval_metrics.json")
 
     parser.add_argument("--image_size", type=int, default=224)
     parser.add_argument("--max_text_len", type=int, default=40)

@@ -1,0 +1,62 @@
+{
+    "test": {
+        "Sadness": {
+            "count": 475,
+            "percentage": 84.97316636851521
+        },
+        "Anger": {
+            "count": 31,
+            "percentage": 5.545617173524151
+        },
+        "Joy": {
+            "count": 19,
+            "percentage": 3.3989266547406083
+        },
+        "Surprise": {
+            "count": 15,
+            "percentage": 2.6833631484794274
+        },
+        "Disgust": {
+            "count": 9,
+            "percentage": 1.6100178890876566
+        },
+        "Fear": {
+            "count": 8,
+            "percentage": 1.4311270125223614
+        },
+        "Neutral": {
+            "count": 2,
+            "percentage": 0.35778175313059035
+        }
+    },
+    "train": {
+        "Sadness": {
+            "count": 5052,
+            "percentage": 86.75940236991242
+        },
+        "Anger": {
+            "count": 285,
+            "percentage": 4.894384337970119
+        },
+        "Joy": {
+            "count": 196,
+            "percentage": 3.3659625622531344
+        },
+        "Fear": {
+            "count": 91,
+            "percentage": 1.5627683324746695
+        },
+        "Surprise": {
+            "count": 116,
+            "percentage": 1.9921002919457322
+        },
+        "Disgust": {
+            "count": 79,
+            "percentage": 1.3566889919285592
+        },
+        "Neutral": {
+            "count": 4,
+            "percentage": 0.06869311351537008
+        }
+    }
+}
