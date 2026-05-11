@@ -166,7 +166,7 @@ if __name__ == "__main__":
     parser.add_argument("--test_input", type=str, default="data/memes-test.json")
     parser.add_argument("--output_dir", type=str, default="outputs/sentiment_classification/labels")
     parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--num_samples", type=int, default=20)
+    parser.add_argument("--num_samples", type=int, default=50)
     parser.add_argument("--model_name", type=str, default="llava-hf/llava-1.5-7b-hf")
     args = parser.parse_args()
     main(args)
