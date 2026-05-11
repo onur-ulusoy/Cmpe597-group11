@@ -191,14 +191,21 @@ Since the raw dataset lacked emotion labels, we implemented an iterative "Silver
 * **Manual Quality Check & Comparison**: To validate annotation quality, we performed systematic manual checks on random subsets against human ground-truth. For a side-by-side comparative analysis of the six tested configurations (Text-only models, LLaVA-1.5 variants, and Qwen-VL-Chat) against human judgments, see the comprehensive [Annotation Comparison Report](outputs/sentiment_classification/labels/comparison_report.md).
 
 ### (b) Unimodal Baselines
-We established two performance baselines using MLP classifiers (LayerNorm + GELU) trained on frozen **CLIP-ViT-L/14** embeddings:
-1.  **Image-Only**: Evaluates the emotional signal purely from visual features.
-2.  **Text-Only**: Evaluates the signal from meme captions/titles.
-Results indicated that text remains the primary carrier of sentiment, with the Image-Only model struggling due to the highly recycled and ambiguous nature of meme templates.
+To investigate whether the pretrained representations carry emotional sentiment under a fair and isolated benchmark, we designed identical MLP classifiers for both modalities.
+
+* **Pre-extracted 768-dim Embeddings**: We utilized frozen **CLIP-ViT-L/14** encoders to pre-extract **768-dimensional visual embeddings** (using the Vision Transformer branch) and **768-dimensional text embeddings** (using the text branch).
+* **Embedding Normalization**: Standard **L2 Normalization** (`x / ||x||_2`) was applied to both visual and textual embeddings before classification, bringing them into a unified scale.
+* **Controlled Comparison (Identical MLP)**: Both the Image-Only and Text-Only baseline classifiers use the **exact same architecture** (`Linear(768) -> LayerNorm -> GELU -> Dropout(0.3) -> Linear(256) -> LayerNorm -> GELU -> Dropout(0.3) -> Linear(128) -> Linear(7)`) and identical hyperparameters (AdamW, 15 epochs, batch size 64) to control for model capacity. This guarantees that any performance difference is strictly attributable to the semantic signal carried by the respective modalities.
+* **Theoretical Expectation (The "Ambiguous Visual Template" Problem)**: Conceptually, we expect text captions to dominate. While text contains explicit semantic sentiment, visual meme templates are heavily recycled across opposing emotions (e.g., the same Drake template represents irritation in one meme and joy in another). Without text context, the visual templates are emotionally ambiguous, which acts as statistical noise during classifier training.
 
 ### (c) Multimodal Custom Architecture (Late Fusion)
 We implemented a **Late Fusion MLP** that concatenates visual and textual CLIP embeddings (1536-dimensional input). 
+* **Input Concatenation**: The model takes the L2-normalized visual embedding (768-dim) and text embedding (768-dim) and concatenates them into a single joint **1536-dimensional representation**.
+* **Architectural Layout**: The concatenated representation is passed through a regularized classifier: `Linear(1536 -> 256) -> LayerNorm -> GELU -> Dropout(0.5) -> Linear(256 -> 7)`. This low-capacity architecture helps control the model's complexity and avoids memorization of the dataset.
 * **Regularization Strategy**: To combat overfitting observed during early training, we implemented a robust regularization suite: **Dropout (0.5)**, **Label Smoothing (0.1)**, and **Weight Decay (1e-2)**.
+  * *High Dropout (0.5)* prevents the model from relying heavily on any specific high-dimensional CLIP dimension.
+  * *Label Smoothing (0.1)* accounts for potential label noise or high subjectivity present in our silver-standard targets.
+  * *Strong Weight Decay (1e-2)* inside the AdamW optimizer constrains the growth of model weights, pushing for smoother, more generalized decision boundaries.
 * **Modality Dominance Analysis**: Results showed "Text Dominance," where the multimodal model achieved performance close to the Text-Only baseline. This suggests that in meme sentiment, the visual component can sometimes act as "noise" when the template is emotionally ambiguous, a common characteristic in internet meme datasets.
 
 ### Analysis of Design Choices in Task 2.3
@@ -263,15 +270,9 @@ The final results indicated a "Text-Only" lead over the Multimodal model. We int
 
 ### Task 2.3: Meme Sentiment Classification (7-Class)
 
-| Architecture / Modality | Strategy / Configuration | Accuracy | Macro F1-Score |
-| :--- | :--- | :--- | :--- |
-| **Unimodal Baseline** | Image-Only MLP (CLIP Visual) | 0.4043 | 0.2725 |
-| **Unimodal Baseline** | Text-Only MLP (CLIP Text) | 0.5224 | **0.4251** |
-| **Multimodal Custom** | Late Fusion MLP (Regularized) | **0.5134** | 0.4211 |
+#### (a) Annotation Label Distributions & Class Imbalance (Task 2.3.a)
 
-#### Annotation Label Distributions & Class Imbalance Analysis (Task 2.3.a)
-
-To validate annotation quality and report on class imbalance as required by Task 2.3.a, the table below documents the complete label distributions across all six tested configurations on the entire dataset ($N = 6,382$ memes).
+To report on class imbalance and annotation quality as required by Task 2.3.a, the table below documents the complete label distributions across all six tested configurations on the entire dataset ($N = 6,382$ memes).
 
 | Emotion Category | DistilRoBERTa (7c) | Twitter-RoBERTa (3c) | LLaVA-1.5 Base (7c) | LLaVA-1.5 Few-Shot (7c) | LLaVA-1.5 Sarcasm (7c) | Qwen-VL Chat (7c, Final) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -285,10 +286,20 @@ To validate annotation quality and report on class imbalance as required by Task
 
 *\*Note: Twitter-RoBERTa operates on 3 classes (Neutral, Positive, Negative). Negative maps to Anger/Negative.*
 
-**Key Takeaways on Class Imbalance & Model Bias:**
-1. **The Text-Only Bottleneck (Neutral Bias)**: Both RoBERTa-based models collapse to an extreme **Neutral Bias (~54%)**. Since they only see captions, they fail to grasp the humorous context or sentiment carried by the meme image template.
-2. **Visual Literalism Collapse**: The base `LLaVA-1.5` model maps more than **54% of memes to Sadness**. It suffers from extreme literalism (e.g., classifying a crying dog meme template as literal melancholy, completely ignoring the sarcastic text). Under the sarcasm prompt, LLaVA completely collapses into **86.6% Sadness**.
-3. **Qwen-VL's Balanced Semantic Mapping**: By leveraging Qwen-VL with robust few-shot sarcasm-aware prompting, we achieved a highly naturalistic and balanced meme distribution. It correctly classifies playful internet sarcasm and humor as **Joy (43.22%)**, observational templates as **Neutral (20.68%)**, and reaction shock as **Surprise (16.08%)**, representing a massive step forward in multimodal meme sentiment analysis.
+* **Imbalance & Bias Finding**: Text-only models suffer from extreme **Neutral Bias (~54%)**, while base LLaVA suffers from extreme **Visual Literalism (54.84% Sadness)**. Our final **Qwen-VL-Chat with Sarcasm-Aware Few-Shot Prompting** successfully resolves these biases, creating a highly balanced distribution centered on **Joy (43.22%)**, **Neutral (20.68%)**, and **Surprise (16.08%)**.
+
+#### (b) MLP Classifier Performance Comparison (Task 2.3.b & 2.3.c)
+
+The table below reports the classification performances of our unimodal baseline MLPs (Task 2.3.b) and custom multimodal late fusion MLP (Task 2.3.c) trained on the silver-standard annotations ($N = 6,382$ memes).
+
+| Architecture / Modality | Strategy / Configuration | Accuracy | Macro F1-Score |
+| :--- | :--- | :--- | :--- |
+| **Unimodal Baseline (2.3.b)** | Image-Only MLP (CLIP Visual) | 0.4043 | 0.2725 |
+| **Unimodal Baseline (2.3.b)** | Text-Only MLP (CLIP Text) | 0.5224 | **0.4251** |
+| **Multimodal Custom (2.3.c)** | Late Fusion MLP (Regularized) | **0.5134** | 0.4211 |
+
+* **Empirical Finding (Modality Dominance)**: The **Text-Only MLP (0.4251 Macro F1)** outperforms the **Image-Only MLP (0.2725 Macro F1)** by a substantial **15.26% F1 margin**, showing that caption text holds significantly stronger and cleaner sentiment signals downstream than raw, recycled visual templates.
+* **Multimodal Joint Behavior (Sub-optimal Late Fusion)**: The **Late Fusion MLP (0.4211 Macro F1, 0.5134 Accuracy)** performs slightly *worse* than the pure unimodal Text-Only MLP. In multimodal research, this is a classic signature of **modal interference** during late fusion. Since the visual templates of memes are recycled under opposite emotional meanings, concatenating their raw visual features introduces statistical noise that dilutes the clear textual signals. While the multimodal model successfully avoids collapsing to the poor baseline of the Image-Only model (0.2725 F1), it undergoes "text dominance" where it relies primarily on the caption features, leaving the text-only model slightly cleaner and more dominant overall.
 
 ---
 
