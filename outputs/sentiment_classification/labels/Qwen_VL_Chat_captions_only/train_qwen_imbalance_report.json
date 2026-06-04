@@ -1,0 +1,84 @@
+{
+    "total_items": 5823,
+    "valid_labeled_items": 5812,
+    "invalid_or_missing_items": 11,
+    "all_label_distribution": {
+        "Joy": {
+            "count": 2652,
+            "percentage": 45.54
+        },
+        "Fear": {
+            "count": 1073,
+            "percentage": 18.43
+        },
+        "Anger": {
+            "count": 934,
+            "percentage": 16.04
+        },
+        "Neutral": {
+            "count": 704,
+            "percentage": 12.09
+        },
+        "Surprise": {
+            "count": 188,
+            "percentage": 3.23
+        },
+        "Disgust": {
+            "count": 138,
+            "percentage": 2.37
+        },
+        "Sadness": {
+            "count": 123,
+            "percentage": 2.11
+        },
+        "INVALID": {
+            "count": 11,
+            "percentage": 0.19
+        }
+    },
+    "valid_label_distribution": {
+        "Anger": {
+            "count": 934,
+            "percentage_among_valid": 16.07,
+            "percentage_among_all": 16.04
+        },
+        "Disgust": {
+            "count": 138,
+            "percentage_among_valid": 2.37,
+            "percentage_among_all": 2.37
+        },
+        "Fear": {
+            "count": 1073,
+            "percentage_among_valid": 18.46,
+            "percentage_among_all": 18.43
+        },
+        "Joy": {
+            "count": 2652,
+            "percentage_among_valid": 45.63,
+            "percentage_among_all": 45.54
+        },
+        "Neutral": {
+            "count": 704,
+            "percentage_among_valid": 12.11,
+            "percentage_among_all": 12.09
+        },
+        "Sadness": {
+            "count": 123,
+            "percentage_among_valid": 2.12,
+            "percentage_among_all": 2.11
+        },
+        "Surprise": {
+            "count": 188,
+            "percentage_among_valid": 3.23,
+            "percentage_among_all": 3.23
+        }
+    },
+    "split": "train",
+    "input_path": "data/memes-trainval.json",
+    "skipped_missing_text": 0,
+    "skipped_missing_image": 0,
+    "exception_count": 0,
+    "invalid_count": 11,
+    "text_source": "meme_caption",
+    "model_name": "Qwen/Qwen-VL-Chat"
+}
