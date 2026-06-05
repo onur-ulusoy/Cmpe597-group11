@@ -23,6 +23,11 @@ VALID_CLASSES = [
     "Surprise",
 ]
 
+AUX_CLASSES = [
+    "INVALID",
+    "AMBIGUOUS",
+]
+
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -63,7 +68,9 @@ def clean_vlm_output(text, valid_classes=VALID_CLASSES):
     Robustly extract exactly one valid class.
 
     Returns:
-        one of VALID_CLASSES, or "INVALID"
+        one of VALID_CLASSES
+        "AMBIGUOUS"
+        "INVALID"
 
     This avoids the dangerous behavior of returning Joy from:
         "not Joy, probably Sadness"
@@ -77,12 +84,19 @@ def clean_vlm_output(text, valid_classes=VALID_CLASSES):
     text = re.sub(r"^\s*(emotion|label|answer)\s*:\s*", "", text, flags=re.IGNORECASE)
     lowered = text.lower().strip()
 
+    # Check explicit ambiguous output.
+    if re.search(r"\bambiguous\b", lowered):
+        return "AMBIGUOUS"
+
     # Exact label after removing non-letters.
     cleaned_alpha = re.sub(r"[^a-zA-Z]", "", lowered)
 
     for label in valid_classes:
         if cleaned_alpha == label.lower():
             return label
+
+    if cleaned_alpha == "ambiguous":
+        return "AMBIGUOUS"
 
     # If exactly one class name appears as a full word, accept it.
     matches = []
@@ -99,7 +113,17 @@ def clean_vlm_output(text, valid_classes=VALID_CLASSES):
     return "INVALID"
 
 
-def build_prompt(caption, annotation_mode):
+def build_prompt(caption, annotation_mode, allow_ambiguous=False):
+    ambiguous_rule = ""
+    label_list = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise"
+
+    if allow_ambiguous:
+        ambiguous_rule = (
+            "\n- If two or more labels are equally plausible and there is no clear best label, "
+            "return AMBIGUOUS.\n"
+        )
+        label_list = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise, AMBIGUOUS"
+
     if annotation_mode == "caption_only":
         return f"""You are annotating the dominant intended emotion of a meme caption.
 
@@ -109,14 +133,14 @@ Classify the emotion or attitude expressed by the meme poster.
 Important rules:
 - Do not assume every humorous meme is Joy.
 - Do not use Fear unless the poster is expressing anxiety, danger, threat, panic, or being scared.
-- Do not use Disgust for ordinary disappointment. Use Disgust only for revulsion, contempt, or strong rejection.
-- Use Anger for frustration, annoyance, blame, criticism, or complaint.
+- Do not use Disgust for ordinary disappointment or frustration. Use Disgust only for revulsion, contempt, or strong rejection.
+- Use Anger for frustration, annoyance, blame, criticism, complaint, or resentment.
 - Use Sadness for disappointment, heartbreak, loss, hopelessness, or something being ruined.
 - Use Surprise for shock, disbelief, confusion, or unexpectedness.
-- Use Neutral only when there is no clear emotional attitude.
+- Use Neutral only when there is no clear emotional attitude.{ambiguous_rule}
 
 Labels:
-Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
+{label_list}
 
 Caption:
 {caption}
@@ -139,20 +163,22 @@ Do NOT label based only on literal visual features such as:
 - scared-looking characters
 - dark colors
 - dramatic scenes
+- crying/sad faces
+- explosions or danger-looking scenes
 
 Classify the emotion or attitude expressed by the meme poster.
 
 Important rules:
 - Do not assume every humorous meme is Joy.
 - Do not use Fear unless the poster is expressing anxiety, danger, threat, panic, or being scared.
-- Do not use Disgust for ordinary disappointment. Use Disgust only for revulsion, contempt, or strong rejection.
-- Use Anger for frustration, annoyance, blame, criticism, or complaint.
+- Do not use Disgust for ordinary disappointment or frustration. Use Disgust only for revulsion, contempt, or strong rejection.
+- Use Anger for frustration, annoyance, blame, criticism, complaint, or resentment.
 - Use Sadness for disappointment, heartbreak, loss, hopelessness, or something being ruined.
 - Use Surprise for shock, disbelief, confusion, or unexpectedness.
-- Use Neutral only when there is no clear emotional attitude.
+- Use Neutral only when there is no clear emotional attitude.{ambiguous_rule}
 
 Labels:
-Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
+{label_list}
 
 Caption:
 {caption}
@@ -160,6 +186,55 @@ Caption:
 Return only one label.
 
 Label:"""
+
+    raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
+
+
+def build_retry_prompt(caption, annotation_mode, allow_ambiguous=False):
+    if annotation_mode == "caption_only":
+        input_description = "caption"
+    elif annotation_mode == "image_caption":
+        input_description = "meme image and caption"
+    else:
+        raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
+
+    if allow_ambiguous:
+        allowed = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise, AMBIGUOUS"
+        extra = "If the correct label is unclear, return AMBIGUOUS."
+    else:
+        allowed = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise"
+        extra = "Choose the single best label."
+
+    return f"""Classify the dominant intended emotion of the {input_description}.
+
+Caption:
+{caption}
+
+Allowed labels:
+{allowed}
+
+{extra}
+Return only one allowed label. No explanation.
+
+Label:"""
+
+
+def make_query(tokenizer, prompt_text, img_path, annotation_mode):
+    """
+    caption_only:
+        Send only text to Qwen.
+
+    image_caption:
+        Send image + text using Qwen-VL formatting.
+    """
+    if annotation_mode == "caption_only":
+        return prompt_text
+
+    if annotation_mode == "image_caption":
+        return tokenizer.from_list_format([
+            {"image": img_path},
+            {"text": prompt_text},
+        ])
 
     raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
 
@@ -179,7 +254,11 @@ def compute_distribution(items, label_key):
     total = sum(counter.values())
 
     valid_total = sum(counter[label] for label in VALID_CLASSES)
-    invalid_or_missing_total = counter.get("INVALID", 0) + counter.get("MISSING", 0)
+    aux_or_missing_total = (
+        counter.get("INVALID", 0)
+        + counter.get("AMBIGUOUS", 0)
+        + counter.get("MISSING", 0)
+    )
 
     all_label_distribution = {}
     for label, count in counter.most_common():
@@ -197,12 +276,21 @@ def compute_distribution(items, label_key):
             "percentage_among_all": round((count / total) * 100, 2) if total else 0.0,
         }
 
+    aux_distribution = {}
+    for label in AUX_CLASSES + ["MISSING"]:
+        count = counter.get(label, 0)
+        aux_distribution[label] = {
+            "count": count,
+            "percentage_among_all": round((count / total) * 100, 2) if total else 0.0,
+        }
+
     return {
         "total_items": total,
         "valid_labeled_items": valid_total,
-        "invalid_or_missing_items": invalid_or_missing_total,
+        "aux_or_missing_items": aux_or_missing_total,
         "all_label_distribution": all_label_distribution,
         "valid_label_distribution": valid_label_distribution,
+        "aux_distribution": aux_distribution,
     }
 
 
@@ -216,7 +304,7 @@ def stratified_sample(items, label_key, per_class=10, seed=42):
 
     sampled = []
 
-    for label in VALID_CLASSES + ["INVALID"]:
+    for label in VALID_CLASSES + AUX_CLASSES:
         group = by_label.get(label, [])
         if not group:
             continue
@@ -327,6 +415,7 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
     skipped_missing_image = 0
     exception_count = 0
     invalid_count = 0
+    ambiguous_count = 0
 
     for item in tqdm(data, desc=f"{split_name} / {args.annotation_mode}"):
         caption = get_meme_caption(item)
@@ -347,7 +436,12 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
         final_label = "INVALID"
 
         try:
-            prompt_text = build_prompt(caption, args.annotation_mode)
+            prompt_text = build_prompt(
+                caption=caption,
+                annotation_mode=args.annotation_mode,
+                allow_ambiguous=args.allow_ambiguous,
+            )
+
             query = make_query(
                 tokenizer=tokenizer,
                 prompt_text=prompt_text,
@@ -359,7 +453,12 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
             final_label = clean_vlm_output(raw_response)
 
             if final_label == "INVALID" and args.retry_invalid:
-                retry_prompt = build_retry_prompt(caption, args.annotation_mode)
+                retry_prompt = build_retry_prompt(
+                    caption=caption,
+                    annotation_mode=args.annotation_mode,
+                    allow_ambiguous=args.allow_ambiguous,
+                )
+
                 retry_query = make_query(
                     tokenizer=tokenizer,
                     prompt_text=retry_prompt,
@@ -383,11 +482,14 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
 
         if final_label == "INVALID":
             invalid_count += 1
+        elif final_label == "AMBIGUOUS":
+            ambiguous_count += 1
 
         item[label_key] = final_label
         item[raw_key] = raw_response
         item[f"qwen_{args.annotation_mode}_model"] = args.model_name
         item[f"qwen_{args.annotation_mode}_annotation_mode"] = args.annotation_mode
+        item[f"qwen_{args.annotation_mode}_allow_ambiguous"] = args.allow_ambiguous
 
         processed_data.append(item)
 
@@ -403,6 +505,8 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
     report["skipped_missing_image"] = skipped_missing_image
     report["exception_count"] = exception_count
     report["invalid_count"] = invalid_count
+    report["ambiguous_count"] = ambiguous_count
+    report["allow_ambiguous"] = args.allow_ambiguous
 
     report_json = output_base / f"{split_name}_qwen_{args.annotation_mode}_imbalance_report.json"
     save_json(report, report_json)
@@ -410,7 +514,9 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
     print(f"Saved labels to: {output_json}")
     print(f"Saved report to: {report_json}")
     print(f"Valid labels: {report['valid_labeled_items']}")
-    print(f"Invalid/missing labels: {report['invalid_or_missing_items']}")
+    print(f"Aux/missing labels: {report['aux_or_missing_items']}")
+    print(f"Invalid labels: {invalid_count}")
+    print(f"Ambiguous labels: {ambiguous_count}")
 
     return processed_data, report
 
@@ -427,6 +533,9 @@ def main(args):
         run_slug = f"{model_slug}_image_caption"
     else:
         raise ValueError(f"Unknown annotation_mode: {args.annotation_mode}")
+
+    if args.output_suffix:
+        run_slug = f"{run_slug}_{args.output_suffix}"
 
     output_base = Path(args.output_dir) / run_slug
     output_base.mkdir(parents=True, exist_ok=True)
@@ -554,6 +663,25 @@ if __name__ == "__main__":
         "--retry_invalid",
         action="store_true",
         help="Retry once with a stricter prompt if the first response is invalid.",
+    )
+
+    parser.add_argument(
+        "--allow_ambiguous",
+        action="store_true",
+        help=(
+            "Allow the model to return AMBIGUOUS for unclear samples. "
+            "Useful for cleaner silver labels, but you should exclude AMBIGUOUS from classifier training."
+        ),
+    )
+
+    parser.add_argument(
+        "--output_suffix",
+        type=str,
+        default="",
+        help=(
+            "Optional suffix for output folder. "
+            "Example: --output_suffix revised_prompt creates Qwen_VL_Chat_image_caption_revised_prompt."
+        ),
     )
 
     parser.add_argument(
