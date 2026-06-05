@@ -103,93 +103,63 @@ def build_prompt(caption, annotation_mode):
     if annotation_mode == "caption_only":
         return f"""You are annotating the dominant intended emotion of a meme caption.
 
-Classify the emotional intent of the caption below.
-Do not assume that every humorous or sarcastic meme is Joy.
-A meme caption may use irony, sarcasm, exaggeration, or understatement.
+The caption is a human-written explanation of what the meme poster is trying to convey.
+Classify the emotion or attitude expressed by the meme poster.
 
-Choose the single best label:
+Important rules:
+- Do not assume every humorous meme is Joy.
+- Do not use Fear unless the poster is expressing anxiety, danger, threat, panic, or being scared.
+- Do not use Disgust for ordinary disappointment. Use Disgust only for revulsion, contempt, or strong rejection.
+- Use Anger for frustration, annoyance, blame, criticism, or complaint.
+- Use Sadness for disappointment, heartbreak, loss, hopelessness, or something being ruined.
+- Use Surprise for shock, disbelief, confusion, or unexpectedness.
+- Use Neutral only when there is no clear emotional attitude.
 
-Anger: outrage, annoyance, hostility, or blaming.
-Disgust: contempt, revulsion, rejection, or strong disapproval.
-Fear: anxiety, worry, threat, insecurity, or panic.
-Joy: amusement, happiness, playful satisfaction, or positive humor.
-Neutral: factual, unclear, mixed, or no strong emotional intent.
-Sadness: disappointment, grief, loneliness, hopelessness, or loss.
-Surprise: shock, disbelief, amazement, or unexpectedness.
+Labels:
+Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
 
 Caption:
 {caption}
 
-Return exactly one label from this list:
-Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise.
+Return only one label.
 
 Label:"""
 
     if annotation_mode == "image_caption":
         return f"""You are annotating the dominant intended emotion of an internet meme.
 
-Use both the provided meme image and the meme caption below.
-Do not assume that every humorous or sarcastic meme is Joy.
-A meme may use irony, sarcasm, exaggeration, or visual contrast to express negative emotions.
+The caption below is a human-written explanation of the meme poster's intended meaning.
+Treat the caption as the primary evidence.
+Use the image only as supporting context to understand the joke, irony, or visual contrast.
 
-Choose the single best label:
+Do NOT label based only on literal visual features such as:
+- fire or destruction
+- weapons
+- angry-looking characters
+- scared-looking characters
+- dark colors
+- dramatic scenes
 
-Anger: outrage, annoyance, hostility, or blaming.
-Disgust: contempt, revulsion, rejection, or strong disapproval.
-Fear: anxiety, worry, threat, insecurity, or panic.
-Joy: amusement, happiness, playful satisfaction, or positive humor.
-Neutral: factual, unclear, mixed, or no strong emotional intent.
-Sadness: disappointment, grief, loneliness, hopelessness, or loss.
-Surprise: shock, disbelief, amazement, or unexpectedness.
+Classify the emotion or attitude expressed by the meme poster.
 
-Caption:
-{caption}
+Important rules:
+- Do not assume every humorous meme is Joy.
+- Do not use Fear unless the poster is expressing anxiety, danger, threat, panic, or being scared.
+- Do not use Disgust for ordinary disappointment. Use Disgust only for revulsion, contempt, or strong rejection.
+- Use Anger for frustration, annoyance, blame, criticism, or complaint.
+- Use Sadness for disappointment, heartbreak, loss, hopelessness, or something being ruined.
+- Use Surprise for shock, disbelief, confusion, or unexpectedness.
+- Use Neutral only when there is no clear emotional attitude.
 
-Return exactly one label from this list:
-Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise.
-
-Label:"""
-
-    raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
-
-
-def build_retry_prompt(caption, annotation_mode):
-    if annotation_mode == "caption_only":
-        input_description = "caption"
-    elif annotation_mode == "image_caption":
-        input_description = "meme image and caption"
-    else:
-        raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
-
-    return f"""Classify the dominant intended emotion of the {input_description}.
-
-Caption:
-{caption}
-
-Allowed labels:
+Labels:
 Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
 
-Return only one allowed label. No explanation.
+Caption:
+{caption}
+
+Return only one label.
 
 Label:"""
-
-
-def make_query(tokenizer, prompt_text, img_path, annotation_mode):
-    """
-    caption_only:
-        Send only text to Qwen.
-
-    image_caption:
-        Send image + text using Qwen-VL formatting.
-    """
-    if annotation_mode == "caption_only":
-        return prompt_text
-
-    if annotation_mode == "image_caption":
-        return tokenizer.from_list_format([
-            {"image": img_path},
-            {"text": prompt_text},
-        ])
 
     raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
 

@@ -1,77 +1,49 @@
 {
     "train": {
         "total_items": 5823,
-        "valid_labeled_items": 5815,
-        "invalid_or_missing_items": 8,
+        "valid_labeled_items": 0,
+        "invalid_or_missing_items": 5823,
         "all_label_distribution": {
-            "Joy": {
-                "count": 2707,
-                "percentage_among_all": 46.49
-            },
-            "Fear": {
-                "count": 1278,
-                "percentage_among_all": 21.95
-            },
-            "Anger": {
-                "count": 923,
-                "percentage_among_all": 15.85
-            },
-            "Neutral": {
-                "count": 314,
-                "percentage_among_all": 5.39
-            },
-            "Surprise": {
-                "count": 242,
-                "percentage_among_all": 4.16
-            },
-            "Disgust": {
-                "count": 220,
-                "percentage_among_all": 3.78
-            },
-            "Sadness": {
-                "count": 131,
-                "percentage_among_all": 2.25
-            },
             "INVALID": {
-                "count": 8,
-                "percentage_among_all": 0.14
+                "count": 5823,
+                "percentage_among_all": 100.0
             }
         },
         "valid_label_distribution": {
             "Anger": {
-                "count": 923,
-                "percentage_among_valid": 15.87,
-                "percentage_among_all": 15.85
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Disgust": {
-                "count": 220,
-                "percentage_among_valid": 3.78,
-                "percentage_among_all": 3.78
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Fear": {
-                "count": 1278,
-                "percentage_among_valid": 21.98,
-                "percentage_among_all": 21.95
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Joy": {
-                "count": 2707,
-                "percentage_among_valid": 46.55,
-                "percentage_among_all": 46.49
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Neutral": {
-                "count": 314,
-                "percentage_among_valid": 5.4,
-                "percentage_among_all": 5.39
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Sadness": {
-                "count": 131,
-                "percentage_among_valid": 2.25,
-                "percentage_among_all": 2.25
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Surprise": {
-                "count": 242,
-                "percentage_among_valid": 4.16,
-                "percentage_among_all": 4.16
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             }
         },
         "split": "train",
@@ -80,82 +52,54 @@
         "model_name": "Qwen/Qwen-VL-Chat",
         "skipped_missing_caption": 0,
         "skipped_missing_image": 0,
-        "exception_count": 0,
-        "invalid_count": 8
+        "exception_count": 5823,
+        "invalid_count": 5823
     },
     "test": {
         "total_items": 559,
-        "valid_labeled_items": 558,
-        "invalid_or_missing_items": 1,
+        "valid_labeled_items": 0,
+        "invalid_or_missing_items": 559,
         "all_label_distribution": {
-            "Joy": {
-                "count": 241,
-                "percentage_among_all": 43.11
-            },
-            "Fear": {
-                "count": 133,
-                "percentage_among_all": 23.79
-            },
-            "Anger": {
-                "count": 102,
-                "percentage_among_all": 18.25
-            },
-            "Disgust": {
-                "count": 32,
-                "percentage_among_all": 5.72
-            },
-            "Neutral": {
-                "count": 21,
-                "percentage_among_all": 3.76
-            },
-            "Surprise": {
-                "count": 21,
-                "percentage_among_all": 3.76
-            },
-            "Sadness": {
-                "count": 8,
-                "percentage_among_all": 1.43
-            },
             "INVALID": {
-                "count": 1,
-                "percentage_among_all": 0.18
+                "count": 559,
+                "percentage_among_all": 100.0
             }
         },
         "valid_label_distribution": {
             "Anger": {
-                "count": 102,
-                "percentage_among_valid": 18.28,
-                "percentage_among_all": 18.25
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Disgust": {
-                "count": 32,
-                "percentage_among_valid": 5.73,
-                "percentage_among_all": 5.72
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Fear": {
-                "count": 133,
-                "percentage_among_valid": 23.84,
-                "percentage_among_all": 23.79
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Joy": {
-                "count": 241,
-                "percentage_among_valid": 43.19,
-                "percentage_among_all": 43.11
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Neutral": {
-                "count": 21,
-                "percentage_among_valid": 3.76,
-                "percentage_among_all": 3.76
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Sadness": {
-                "count": 8,
-                "percentage_among_valid": 1.43,
-                "percentage_among_all": 1.43
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             },
             "Surprise": {
-                "count": 21,
-                "percentage_among_valid": 3.76,
-                "percentage_among_all": 3.76
+                "count": 0,
+                "percentage_among_valid": 0.0,
+                "percentage_among_all": 0.0
             }
         },
         "split": "test",
@@ -164,7 +108,7 @@
         "model_name": "Qwen/Qwen-VL-Chat",
         "skipped_missing_caption": 0,
         "skipped_missing_image": 0,
-        "exception_count": 0,
-        "invalid_count": 1
+        "exception_count": 559,
+        "invalid_count": 559
     }
 }
