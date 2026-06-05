@@ -1,0 +1,202 @@
+{
+    "train": {
+        "total_items": 5823,
+        "valid_labeled_items": 5808,
+        "aux_or_missing_items": 15,
+        "all_label_distribution": {
+            "Anger": {
+                "count": 2234,
+                "percentage_among_all": 38.37
+            },
+            "Joy": {
+                "count": 1760,
+                "percentage_among_all": 30.22
+            },
+            "Neutral": {
+                "count": 1010,
+                "percentage_among_all": 17.35
+            },
+            "Surprise": {
+                "count": 450,
+                "percentage_among_all": 7.73
+            },
+            "Sadness": {
+                "count": 159,
+                "percentage_among_all": 2.73
+            },
+            "Fear": {
+                "count": 154,
+                "percentage_among_all": 2.64
+            },
+            "Disgust": {
+                "count": 41,
+                "percentage_among_all": 0.7
+            },
+            "INVALID": {
+                "count": 15,
+                "percentage_among_all": 0.26
+            }
+        },
+        "valid_label_distribution": {
+            "Anger": {
+                "count": 2234,
+                "percentage_among_valid": 38.46,
+                "percentage_among_all": 38.37
+            },
+            "Disgust": {
+                "count": 41,
+                "percentage_among_valid": 0.71,
+                "percentage_among_all": 0.7
+            },
+            "Fear": {
+                "count": 154,
+                "percentage_among_valid": 2.65,
+                "percentage_among_all": 2.64
+            },
+            "Joy": {
+                "count": 1760,
+                "percentage_among_valid": 30.3,
+                "percentage_among_all": 30.22
+            },
+            "Neutral": {
+                "count": 1010,
+                "percentage_among_valid": 17.39,
+                "percentage_among_all": 17.35
+            },
+            "Sadness": {
+                "count": 159,
+                "percentage_among_valid": 2.74,
+                "percentage_among_all": 2.73
+            },
+            "Surprise": {
+                "count": 450,
+                "percentage_among_valid": 7.75,
+                "percentage_among_all": 7.73
+            }
+        },
+        "aux_distribution": {
+            "INVALID": {
+                "count": 15,
+                "percentage_among_all": 0.26
+            },
+            "AMBIGUOUS": {
+                "count": 0,
+                "percentage_among_all": 0.0
+            },
+            "MISSING": {
+                "count": 0,
+                "percentage_among_all": 0.0
+            }
+        },
+        "split": "train",
+        "annotation_mode": "image_caption",
+        "input_path": "data/memes-trainval.json",
+        "model_name": "Qwen/Qwen-VL-Chat",
+        "skipped_missing_caption": 0,
+        "skipped_missing_image": 0,
+        "exception_count": 0,
+        "invalid_count": 15,
+        "ambiguous_count": 0,
+        "allow_ambiguous": false
+    },
+    "test": {
+        "total_items": 559,
+        "valid_labeled_items": 558,
+        "aux_or_missing_items": 1,
+        "all_label_distribution": {
+            "Anger": {
+                "count": 262,
+                "percentage_among_all": 46.87
+            },
+            "Joy": {
+                "count": 154,
+                "percentage_among_all": 27.55
+            },
+            "Neutral": {
+                "count": 75,
+                "percentage_among_all": 13.42
+            },
+            "Surprise": {
+                "count": 34,
+                "percentage_among_all": 6.08
+            },
+            "Fear": {
+                "count": 15,
+                "percentage_among_all": 2.68
+            },
+            "Sadness": {
+                "count": 11,
+                "percentage_among_all": 1.97
+            },
+            "Disgust": {
+                "count": 7,
+                "percentage_among_all": 1.25
+            },
+            "INVALID": {
+                "count": 1,
+                "percentage_among_all": 0.18
+            }
+        },
+        "valid_label_distribution": {
+            "Anger": {
+                "count": 262,
+                "percentage_among_valid": 46.95,
+                "percentage_among_all": 46.87
+            },
+            "Disgust": {
+                "count": 7,
+                "percentage_among_valid": 1.25,
+                "percentage_among_all": 1.25
+            },
+            "Fear": {
+                "count": 15,
+                "percentage_among_valid": 2.69,
+                "percentage_among_all": 2.68
+            },
+            "Joy": {
+                "count": 154,
+                "percentage_among_valid": 27.6,
+                "percentage_among_all": 27.55
+            },
+            "Neutral": {
+                "count": 75,
+                "percentage_among_valid": 13.44,
+                "percentage_among_all": 13.42
+            },
+            "Sadness": {
+                "count": 11,
+                "percentage_among_valid": 1.97,
+                "percentage_among_all": 1.97
+            },
+            "Surprise": {
+                "count": 34,
+                "percentage_among_valid": 6.09,
+                "percentage_among_all": 6.08
+            }
+        },
+        "aux_distribution": {
+            "INVALID": {
+                "count": 1,
+                "percentage_among_all": 0.18
+            },
+            "AMBIGUOUS": {
+                "count": 0,
+                "percentage_among_all": 0.0
+            },
+            "MISSING": {
+                "count": 0,
+                "percentage_among_all": 0.0
+            }
+        },
+        "split": "test",
+        "annotation_mode": "image_caption",
+        "input_path": "data/memes-test.json",
+        "model_name": "Qwen/Qwen-VL-Chat",
+        "skipped_missing_caption": 0,
+        "skipped_missing_image": 0,
+        "exception_count": 0,
+        "invalid_count": 1,
+        "ambiguous_count": 0,
+        "allow_ambiguous": false
+    }
+}
