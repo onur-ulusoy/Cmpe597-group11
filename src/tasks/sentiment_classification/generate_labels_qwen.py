@@ -113,84 +113,58 @@ def clean_vlm_output(text, valid_classes=VALID_CLASSES):
     return "INVALID"
 
 
-def build_prompt(caption, annotation_mode, allow_ambiguous=False):
-    ambiguous_rule = ""
-    label_list = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise"
-
-    if allow_ambiguous:
-        ambiguous_rule = (
-            "\n- If two or more labels are equally plausible and there is no clear best label, "
-            "return AMBIGUOUS.\n"
-        )
-        label_list = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise, AMBIGUOUS"
-
+def build_prompt(caption, annotation_mode):
     if annotation_mode == "caption_only":
-        return f"""You are annotating the dominant intended emotion of a meme caption.
+        return f"""Classify the dominant emotion expressed by this meme caption.
 
-The caption is a human-written explanation of what the meme poster is trying to convey.
-Classify the emotion or attitude expressed by the meme poster.
+Use exactly one label:
+Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
 
-Important rules:
-- Do not assume every humorous meme is Joy.
-- Do not use Fear unless the poster is expressing anxiety, danger, threat, panic, or being scared.
-- Do not use Disgust for ordinary disappointment or frustration. Use Disgust only for revulsion, contempt, or strong rejection.
-- Use Anger for frustration, annoyance, blame, criticism, complaint, or resentment.
-- Use Sadness for disappointment, heartbreak, loss, hopelessness, or something being ruined.
-- Use Surprise for shock, disbelief, confusion, or unexpectedness.
-- Use Neutral only when there is no clear emotional attitude.{ambiguous_rule}
-
-Labels:
-{label_list}
+Guidelines:
+- Joy: funny, playful, amused, light-hearted, affectionate
+- Anger: clearly mad, blaming, hostile, outraged
+- Disgust: contempt, revulsion, strong rejection
+- Fear: anxious, threatened, scared, worried
+- Sadness: disappointed, heartbroken, regretful, hopeless, ruined
+- Surprise: shocked, confused, unexpected, amazed
+- Neutral: weak, descriptive, unclear, or no strong emotion
 
 Caption:
 {caption}
 
-Return only one label.
+Return only the label.
 
 Label:"""
 
     if annotation_mode == "image_caption":
-        return f"""You are annotating the dominant intended emotion of an internet meme.
+        return f"""Classify the dominant emotion expressed by this meme.
 
-The caption below is a human-written explanation of the meme poster's intended meaning.
-Treat the caption as the primary evidence.
-Use the image only as supporting context to understand the joke, irony, or visual contrast.
+Use the caption as the main evidence.
+Use the image only to understand the meme context.
 
-Do NOT label based only on literal visual features such as:
-- fire or destruction
-- weapons
-- angry-looking characters
-- scared-looking characters
-- dark colors
-- dramatic scenes
-- crying/sad faces
-- explosions or danger-looking scenes
+Use exactly one label:
+Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
 
-Classify the emotion or attitude expressed by the meme poster.
-
-Important rules:
-- Do not assume every humorous meme is Joy.
-- Do not use Fear unless the poster is expressing anxiety, danger, threat, panic, or being scared.
-- Do not use Disgust for ordinary disappointment or frustration. Use Disgust only for revulsion, contempt, or strong rejection.
-- Use Anger for frustration, annoyance, blame, criticism, complaint, or resentment.
-- Use Sadness for disappointment, heartbreak, loss, hopelessness, or something being ruined.
-- Use Surprise for shock, disbelief, confusion, or unexpectedness.
-- Use Neutral only when there is no clear emotional attitude.{ambiguous_rule}
-
-Labels:
-{label_list}
+Guidelines:
+- Joy: funny, playful, amused, light-hearted, affectionate
+- Anger: clearly mad, blaming, hostile, outraged
+- Disgust: contempt, revulsion, strong rejection
+- Fear: anxious, threatened, scared, worried
+- Sadness: disappointed, heartbroken, regretful, hopeless, ruined
+- Surprise: shocked, confused, unexpected, amazed
+- Neutral: weak, descriptive, unclear, or no strong emotion
 
 Caption:
 {caption}
 
-Return only one label.
+Return only the label.
 
 Label:"""
 
     raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
 
 
-def build_retry_prompt(caption, annotation_mode, allow_ambiguous=False):
+def build_retry_prompt(caption, annotation_mode):
     if annotation_mode == "caption_only":
         input_description = "caption"
     elif annotation_mode == "image_caption":
@@ -198,22 +172,23 @@ def build_retry_prompt(caption, annotation_mode, allow_ambiguous=False):
     else:
         raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
 
-    if allow_ambiguous:
-        allowed = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise, AMBIGUOUS"
-        extra = "If the correct label is unclear, return AMBIGUOUS."
-    else:
-        allowed = "Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise"
-        extra = "Choose the single best label."
-
     return f"""Classify the dominant intended emotion of the {input_description}.
+
+Use these rules:
+- Playful joke, absurd comparison, harmless irony, or self-deprecating humor -> Joy.
+- Strong hostility, blame, resentment, or outrage -> Anger.
+- Revulsion, contempt, or strong rejection -> Disgust.
+- Anxiety, threat, danger, or panic -> Fear.
+- Heartbreak, loss, disappointment, regret, or ruined situation -> Sadness.
+- Shock, disbelief, confusion, or unexpected twist -> Surprise.
+- Weak, descriptive, or unclear emotion -> Neutral.
 
 Caption:
 {caption}
 
 Allowed labels:
-{allowed}
+Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
 
-{extra}
 Return only one allowed label. No explanation.
 
 Label:"""
@@ -439,7 +414,6 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
             prompt_text = build_prompt(
                 caption=caption,
                 annotation_mode=args.annotation_mode,
-                allow_ambiguous=args.allow_ambiguous,
             )
 
             query = make_query(
@@ -456,7 +430,6 @@ def process_split(split_name, input_path, model, tokenizer, args, output_base):
                 retry_prompt = build_retry_prompt(
                     caption=caption,
                     annotation_mode=args.annotation_mode,
-                    allow_ambiguous=args.allow_ambiguous,
                 )
 
                 retry_query = make_query(
