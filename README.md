@@ -36,118 +36,158 @@ The dataset is sourced from the official MemeCap repository.
 
 ## 3. Task 2.1: Cross-Modal Retrieval
 
-In this task, we aim to retrieve the correct meme caption from a candidate pool given a query. We utilize a dual-encoder architecture where images and texts are projected into a shared latent space. We evaluate two input types:
-*   **Type 1 (Image Only):** The query is the visual embedding of the meme image.
-*   **Type 2 (Image + Title):** The query is a weighted fusion of the image embedding and the Reddit post title embedding ($\alpha \cdot \text{img} + (1-\alpha) \cdot \text{title}$).
+In this task, the goal is to retrieve the correct meme caption from a candidate pool given a meme query. We formulate the task as a cross-modal retrieval problem, where query memes and candidate captions are embedded into a shared latent space and ranked using cosine similarity.
 
-### (a) Evaluation Strategy & Metrics
+We evaluate two query types:
 
-This task is formulated as an image-to-text retrieval problem. For each query meme, the model ranks all candidate meme captions in the test set according to cosine similarity in a shared embedding space. This is a full-gallery retrieval evaluation, meaning each query is ranked against all test captions.
+- **Type 1 — Image Only:** the query is represented only by the meme image.
+- **Type 2 — Image + Title:** the query is represented by a fusion of the meme image embedding and the Reddit post title embedding.
 
-$$
+For Type 2, we use the following fusion formulation:
+
+\[
+q = \text{normalize}(\alpha e_{\text{image}} + (1-\alpha)e_{\text{title}})
+\]
+
+where \(q\) is the final query embedding.
+
+---
+
+### (a) Evaluation Strategy and Metrics
+
+For each query meme, the model ranks all candidate meme captions in the test set according to similarity in the shared embedding space:
+
+\[
 S(q, c) = q^\top c
-$$
-*(where both embeddings are L2-normalized).*
+\]
 
-**Evaluation Protocol:**
-1. Build the query embedding (Image only for Type 1; Fused Image + Title for Type 2).
-2. Encode all candidate meme captions in the test set.
-3. Compute cosine similarity scores between the query and every candidate caption.
-4. Rank all candidate captions in descending order.
-5. Measure whether the correct caption appears in the top retrieved positions.
+where both query and caption embeddings are L2-normalized.
 
-**Selected Metrics:**
-* **Recall@1 (R@1):** Percentage of queries where the correct caption is ranked exactly first.
-* **Recall@5 (R@5):** Percentage of queries where the correct caption appears within the top 5 retrieved captions.
-  * *Pros:* Easy to interpret, directly reflects retrieval quality, and matches the task objective.
-  * *Cons:* Coarse metric; gives no partial credit when the correct caption is just outside the top-K.
-* **Mean Reciprocal Rank (MRR):** Measures how early the correct caption appears in the ranking (Average of $1/r$ over all queries).
-  * *Pros:* Highly sensitive to ranking quality; better reflects whether the correct caption appears very early.
+The evaluation protocol is:
 
-### (b) Pretrained Architectures (Zero-Shot)
+1. Build the query embedding.
+2. Encode all candidate meme captions.
+3. Compute query-caption similarity scores.
+4. Rank all candidate captions in descending similarity.
+5. Measure whether the correct caption appears near the top of the ranking.
 
-We evaluate pretrained cross-modal retrieval architectures in a zero-shot setting to test how well they transfer to the meme-caption retrieval problem.
+We report the following retrieval metrics:
 
-1. **OpenCLIP (ViT-L/14):** Used as the main zero-shot retrieval baseline. Selected for its strong open-source image-text retrieval capabilities and efficiency for full-gallery ranking.
-2. **SigLIP / SigLIP2:** Included as a strong alternative vision-language model family. Useful for comparison against standard CLIP-style contrastive training.
-3. **BLIP Retrieval / BLIP ITM:** Used specifically as a reranker for top candidates retrieved from faster dual-encoder models to improve final retrieval quality.
+- **Recall@1 (R@1):** percentage of queries where the correct caption is ranked first.
+- **Recall@5 (R@5):** percentage of queries where the correct caption appears in the top 5.
+- **Recall@10 (R@10):** percentage of queries where the correct caption appears in the top 10.
+- **Mean Reciprocal Rank (MRR):** average reciprocal rank of the correct caption.
 
-**Zero-Shot Fusion (Type 2):** For Type 2 Input, a zero-shot fusion strategy is used to combine the image and title into a single query representation:
+---
 
-$$q=\text{normalize}(\alpha \cdot e_{\text{image}}+(1-\alpha)\cdot e_{\text{title}})$$
+### (b) Pretrained Architectures: Zero-Shot Retrieval
 
-*(Note: $\alpha = 0.7$ unless otherwise stated).*
+We first evaluate pretrained vision-language models without any task-specific training.
 
-**BLIP Reranking (Type 2):** For experiments with reranking, the retrieval process is performed in two stages:
+The main zero-shot models are:
 
-1. A dual-encoder model (OpenCLIP or SigLIP) retrieves the top-K candidate captions using embedding similarity.
-2. A BLIP Image-Text Matching (ITM) model scores each candidate image–caption pair.
-3. The final score is computed as a weighted combination of the base retrieval score and the BLIP score:
+1. **OpenCLIP ViT-L/14:** our main zero-shot baseline.
+2. **SigLIP2:** an alternative pretrained vision-language model family.
+3. **OpenCLIP + BLIP Reranker:** a two-stage retrieval pipeline where OpenCLIP retrieves candidates and BLIP reranks them.
 
-$$
-S_{final} = \lambda S_{base} + (1-\lambda) S_{BLIP}
-$$
+For Type 2 zero-shot retrieval, the image and title embeddings are fused before ranking the candidate captions.
 
-where $\lambda = 0.5$ in our experiments.
+---
 
 ### (c) Custom Architecture Trained from Scratch
 
-To establish a baseline and demonstrate cross-modal representation learning from scratch, we designed a custom **Dual-Encoder (Two-Tower) Metric Learning Architecture**. Unlike massive pretrained transformers, this lightweight architecture was built specifically to be trainable from scratch on the limited MemeCap dataset (~5,800 training samples) without severe overfitting.
+To satisfy the custom model requirement, we implemented a lightweight dual-encoder retrieval model trained from scratch.
 
-#### Architecture Components:
-1. **Image Encoder (Custom Residual CNN):** Instead of a computationally heavy Vision Transformer, we implemented a stable Convolutional Neural Network consisting of 4 blocks of Residual Layers (ResNet-style). This extracts hierarchical visual features, applies Adaptive Average Pooling, and uses a Multi-Layer Perceptron (MLP) projection head to map the image into a 256-dimensional latent space.
-2. **Text Encoder (BiGRU):** For processing text, we utilized a Bidirectional Gated Recurrent Unit (BiGRU). A BiGRU is highly efficient for smaller datasets while still capturing the sequential and contextual nuances of meme language. The encoder reads the text in both directions, applies both Mean Pooling (to capture overall context) and Max Pooling (to isolate strong keywords), and projects the result to 256 dimensions.
-3. **Type 2 Multimodal Fusion:** For Type 2 queries, we instantiate a secondary BiGRU specifically for the meme's Reddit `title`. The CNN image features and the BiGRU title features are concatenated and passed through a `FeatureFusion` MLP layer (with GELU activations and Layer Normalization) to compress them into a single 256-dimensional fused query embedding.
-4. **Objective (Symmetric Contrastive Loss):** The entire system is trained end-to-end using a Symmetric Contrastive Loss. This objective explicitly maximizes the cosine similarity between matching image-caption pairs while pushing the embeddings of all other in-batch mismatched pairs apart, perfectly aligning with the cross-modal retrieval task.
+The architecture consists of:
 
-#### Training Dynamics & Results
-The models were trained using the AdamW optimizer with a cosine learning rate scheduler. 
-* **Type 1:** Achieved its best validation score at Epoch 10.
-* **Type 2:** Achieved its best validation score at Epoch 7. 
+- **Image Encoder:** a custom residual CNN that maps meme images into a 256-dimensional latent space.
+- **Caption Encoder:** a BiGRU text encoder that maps meme captions into the same 256-dimensional latent space.
+- **Type 2 Title Fusion:** for Type 2, the Reddit title is encoded separately and fused with the image representation.
+- **Training Objective:** symmetric contrastive loss over in-batch image-caption pairs.
 
-While the absolute retrieval metrics (R@1 ~0.5%) are naturally far below massive models like CLIP (which are trained on billions of images), the training curves and loss reduction demonstrate that the model learned to structure a shared multimodal latent space entirely from scratch. Interestingly, the Type 2 model (Image + Title) outperformed the Type 1 model (Image Only) in R@1 and MRR, proving that our custom fusion layer successfully extracted and utilized the semantic hints hidden in the Reddit titles.
+The model is trained using AdamW and a cosine learning rate schedule. We split the training data into train and validation subsets and select the best checkpoint using validation retrieval performance.
 
-### (d) Finetuning Pretrained Architectures (LoRA)
+The from-scratch model performs far below pretrained CLIP-based models, which is expected because the MemeCap training set is small compared to the web-scale pretraining data used by CLIP. However, it still demonstrates end-to-end cross-modal representation learning from scratch.
 
-To improve upon the zero-shot baseline, we fine-tuned the **OpenCLIP (ViT-L/14)** model using **Low-Rank Adaptation (LoRA)**. LoRA allows us to adapt the pre-trained weights efficiently by injecting trainable rank decomposition matrices into the Transformer layers, rather than retraining the entire massive parameter set.
-
-#### Experiment 1: Image-Only Finetuning (Type 1)
-*   **Base Model:** `ViT-L-14` (pretrained on `laion2b_s32b_b82k`)
-*   **LoRA Config:** Rank ($r$) = 16, Alpha ($\alpha$) = 32, Target Modules = `["c_fc", "c_proj", "out_proj"]`.
-*   **Training:** We trained for 10 epochs using a contrastive loss function on **Image-Caption** pairs.
-*   **Loss Dynamics:** The model converged rapidly, with the training loss decreasing from **0.76** in Epoch 1 to **0.02** by Epoch 10.
-
-![Training Loss Plot Type 1](outputs/retrieval/finetune/type1/20260322_102324/loss_plot.png)
-*Figure: Type 1 Training loss over 10 epochs.*
-
-**Model Selection (Type 1):**
-We saved LoRA adapters at each epoch and selected checkpoints using the held-out test evaluation script after training.. While the training loss continued to decrease, the retrieval performance peaked at **Epoch 7** (68.16% R@1) and subsequently degraded due to overfitting. We selected the **Epoch 7 checkpoint** for Type 1 evaluation.
-
-#### Additional CLIP Projection-Head Experiment
-
-To go beyond the required from-scratch custom model, we trained small projection heads on top of frozen OpenCLIP embeddings. This keeps the pretrained image-text representation fixed while learning a MemeCap-specific alignment layer.
-
-Visualizations:
-
-![Projection Loss](outputs/retrieval/clip_projection/type2_caption_hn_alpha/loss_curve.png)
-
-![Validation Recall](outputs/retrieval/clip_projection/type2_caption_hn_alpha/recall_curve.png)
-
-![Rank Histogram](outputs/retrieval/clip_projection/type2_caption_hn_alpha/rank_histogram.png)
-
-![Similarity Matrix](outputs/retrieval/clip_projection/type2_caption_hn_alpha/similarity_matrix_sample.png)
-
-![Alpha Sweep](outputs/retrieval/clip_projection/type2_caption_hn_alpha/alpha_sweep.png)
 ---
 
-#### Experiment 2: Multimodal Fusion Finetuning (Type 2)
-For the **Type 2** task (Image + Title), simply using the image-only model yielded suboptimal results. To address this, we trained a **specialized adapter** that explicitly learns to align the **fused embedding** (Image + Title) with the target caption.
+### (d) OpenCLIP Finetuning with LoRA
 
-*   **Fusion Strategy:** During training, we normalized and averaged the Image and Title embeddings: $E_{query} = \frac{E_{img} + E_{title}}{2}$.
-*   **Training:** The model was trained to minimize the contrastive loss between this *fused* representation and the caption.
-*   **Model Selection:** The model converged even faster due to the added semantic information from the titles. We selected **Epoch 3** as the optimal checkpoint, achieving a significant boost in performance.![Training Loss Plot Type 2](outputs/retrieval/finetune/type2/20260323_153611/loss_plot.png)
-*Figure: Type 2 Training loss showing rapid convergence.*
+To improve the pretrained OpenCLIP baseline, we fine-tune **OpenCLIP ViT-L/14** using **Low-Rank Adaptation (LoRA)**.
 
+LoRA adapts the pretrained model by adding small trainable low-rank matrices to selected transformer layers, while keeping the main pretrained weights frozen.
+
+Configuration:
+
+- **Base model:** `ViT-L-14`
+- **Pretraining:** `laion2b_s32b_b82k`
+- **LoRA rank:** \(r = 16\)
+- **LoRA alpha:** \(\alpha = 32\)
+- **Target modules:** `c_fc`, `c_proj`, `out_proj`
+
+The corrected LoRA training pipeline uses validation-based checkpoint selection. After each epoch, the adapter is evaluated on a held-out validation split using full-gallery retrieval. The best checkpoint is selected using:
+
+\[
+\text{selection score} = R@5 + 0.5 \times R@1
+\]
+
+Only the best adapter is saved under:
+
+```text
+outputs/retrieval/finetune/type1/best_lora/
+outputs/retrieval/finetune/type2/best_lora/
+```
+
+Recent validation-selected LoRA checkpoints:
+
+| LoRA Model | Best Epoch | Validation R@1 | Validation R@5 | Validation R@10 | Validation MRR |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Type 1 | 2 | 61.86 | 78.35 | 82.65 | 69.31 |
+| Type 2 | 1 | 66.32 | 79.73 | 83.33 | 72.41 |
+
+These early best epochs show that OpenCLIP adapts very quickly to MemeCap. Longer finetuning can overfit, so validation-based checkpoint selection is important.
+
+---
+
+### (e) Additional Experiment: Frozen CLIP Projection Heads
+
+As extra work beyond the project requirements, we trained small projection heads on top of frozen OpenCLIP embeddings.
+
+Instead of training a model from raw pixels and text tokens, this experiment keeps OpenCLIP fixed and only learns lightweight task-specific projection heads:
+
+```text
+frozen CLIP query embedding   -> projection MLP
+frozen CLIP caption embedding -> projection MLP
+```
+
+The model is trained with symmetric contrastive loss. We also use hard negatives mined from frozen OpenCLIP similarities. This tests whether a small MemeCap-specific alignment layer can improve retrieval without full finetuning.
+
+This experiment is not meant to replace LoRA, but it provides a useful middle ground between:
+
+- **From-scratch training**, which satisfies the custom architecture requirement but performs poorly because the dataset is small.
+- **Zero-shot CLIP**, which is already strong but not specifically adapted to MemeCap.
+- **LoRA finetuning**, which gives the best adaptation but modifies the pretrained model through trainable adapters.
+
+Projection-head results:
+
+| Model | Input Type | R@1 (%) | R@5 (%) | R@10 (%) | MRR (%) |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| CLIP Projection Head | Type 1 | 34.35 | 55.64 | 64.04 | 44.33 |
+| CLIP Projection Head | Type 2 | 29.34 | 52.24 | 62.61 | 40.41 |
+
+The projection-head model significantly improves over the from-scratch custom model, but remains below zero-shot OpenCLIP and LoRA. This is expected because the underlying CLIP encoders remain frozen, and only the small projection heads are trained.
+
+The validation curves show that the projection heads learn quickly and then begin to overfit, so validation-based checkpoint selection is necessary.
+
+Example visualizations:
+
+![Projection Head Validation Recall](outputs/retrieval/clip_projection/type1/recall_curve.png)
+
+![Projection Head Rank Histogram](outputs/retrieval/clip_projection_eval/type1/rank_histogram.png)
+
+![Projection Head Similarity Matrix](outputs/retrieval/clip_projection_eval/type1/similarity_matrix_sample.png)
+
+In the rank histogram, the final bin represents all cases where the correct caption is ranked 50 or worse.
 ---
 
 ## 4. Task 2.2: Literal vs. Metaphorical Caption Classification
@@ -221,7 +261,7 @@ Label folders:
 ```text
 outputs/sentiment_classification/labels/Qwen_VL_Chat_image_caption_simple_prompt/
 outputs/sentiment_classification/labels/Qwen_VL_Chat_caption_only_simple_prompt/
-
+```
 ### (b) Unimodal Baselines
 
 We used frozen **CLIP ViT-L/14** to investigate whether image-only and text-only embeddings carry sentiment information.
@@ -246,6 +286,7 @@ Implementation:
 
 ```text
 src/tasks/sentiment_classification/train_unimodal.py
+```
 
 #### 7-Class Image+Caption Labels
 
@@ -273,6 +314,7 @@ Each meme is represented as:
 image embedding: 768 dim
 text embedding : 768 dim
 fused input    : 1536 dim
+```
 
 The model concatenates the image and text embeddings, then passes the fused vector through an MLP classifier:
 
@@ -286,12 +328,14 @@ LayerNorm
 GELU
 Dropout
 Linear(128 -> 7)
+```
 
 The training setup uses validation-based model selection, class-weighted cross entropy, label smoothing, dropout, and AdamW.
 
 Implementation:
 ```text
 src/tasks/sentiment_classification/train_multimodal.py
+```
 
 #### 7-Class Image+Caption Labels
 
@@ -309,22 +353,21 @@ The multimodal model improves over both unimodal baselines in both label setting
 
 ## 6. Performance Results
 
-### Task 2.1: Cross-Modal Retrieval (Meme-Caption Retrieval)
+### Task 2.1: Cross-Modal Retrieval Results
 
-| Model Source | Input Type | R@1 (%) | R@5 (%) | MRR (%) |
-| :--- | :--- | :--- | :--- | :--- |
-| **OpenCLIP (ViT-L/14) Zero-Shot** | Type 1 | 60.29 | 74.78 | 67.51 |
-| **OpenCLIP (ViT-L/14) Zero-Shot** | Type 2 | 56.71 | 71.38 | 63.81 |
-| **OpenCLIP + BLIP Reranker** | Type 2 | 68.16 | 78.89 | 73.16 |
-| | | | | |
-| **SigLIP2 Zero-Shot** | Type 1 | 54.74 | 70.84 | 62.54 |
-| **SigLIP2 Zero-Shot** | Type 2 | 23.43 | 38.28 | 31.50 |
-| | | | | |
-| **Custom Architecture (From Scratch)** | Type 1 | 0.36 | 1.79 | 1.77 |
-| **Custom Architecture (From Scratch)** | Type 2 | 0.54 | 1.61 | 1.82 |
-| | | | | |
-| **OpenCLIP Fine-Tuned (LoRA)** | Type 1 | 68.16 | 79.96 | 73.66 |
-| **OpenCLIP Fine-Tuned (LoRA)** | Type 2 | **66.91** | **82.47** | **74.02** |
+| Model Source | Input Type | R@1 (%) | R@5 (%) | R@10 (%) | MRR (%) |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| **OpenCLIP (ViT-L/14) Zero-Shot** | Type 1 | 60.29 | 74.78 | - | 67.51 |
+| **OpenCLIP (ViT-L/14) Zero-Shot** | Type 2 | 56.71 | 71.38 | - | 63.81 |
+| **OpenCLIP + BLIP Reranker** | Type 2 | 68.16 | 78.89 | - | 73.16 |
+| **SigLIP2 Zero-Shot** | Type 1 | 54.74 | 70.84 | - | 62.54 |
+| **SigLIP2 Zero-Shot** | Type 2 | 23.43 | 38.28 | - | 31.50 |
+| **Custom Architecture From Scratch** | Type 1 | 0.36 | 1.79 | - | 1.77 |
+| **Custom Architecture From Scratch** | Type 2 | 0.54 | 1.61 | - | 1.82 |
+| **CLIP Projection Head** | Type 1 | 34.35 | 55.64 | 64.04 | 44.33 |
+| **CLIP Projection Head** | Type 2 | 29.34 | 52.24 | 62.61 | 40.41 |
+| **OpenCLIP Fine-Tuned LoRA** | Type 1 | 61.85 | 78.35 | 82.64 | 69.30 |
+| **OpenCLIP Fine-Tuned LoRA** | Type 2 | 66.32 | 79.72 | 83.33 | 72.40 |
 
 ### Task 2.2: Literal vs. Metaphorical Caption Classification
 
