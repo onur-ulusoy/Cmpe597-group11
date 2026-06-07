@@ -1,12 +1,14 @@
 {
-  "run_name": "Zero-Shot_ViT-L-14_Thresh0.57",
+  "run_name": "Zero-Shot_ViT-L-14_ValThresh0.533",
   "model_name": "ViT-L-14",
-  "threshold": 0.5701206922531128,
+  "threshold_source": "validation_split_from_trainval",
+  "threshold": 0.5325634479522705,
+  "val_f1": 0.6853303471444568,
   "metrics": {
-    "accuracy": 0.6666666666666666,
-    "precision": 0.6666666666666666,
-    "recall": 1.0,
-    "f1": 0.8,
-    "roc_auc": 0.24134948096885814
+    "accuracy": 0.7668836452400325,
+    "precision": 0.7681336593317033,
+    "recall": 0.9978824775013234,
+    "f1": 0.8680635505411006,
+    "roc_auc": 0.24465246487620032
   }
 }

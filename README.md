@@ -219,43 +219,129 @@ In the rank histogram, the final bin represents all cases where the correct capt
 
 ## 4. Task 2.2: Literal vs. Metaphorical Caption Classification
 
-The goal of this task is to design a classifier that distinguishes between image-caption pairs where the caption literally describes the image and those where it provides a metaphorical interpretation.
+The goal of this task is to classify whether a given image-caption pair is **literal** or **metaphorical/meme-like**.
 
-### (a) Evaluation Framework & Zero-Shot Baseline
+We formulate the problem as a binary classification task:
 
-We've established the classification framework and established a zero-shot similarity-based baseline.
+- **Label 0 — Literal:** the caption directly describes the visual content of the image.
+- **Label 1 — Meme / Metaphorical:** the caption expresses meme-style, ironic, humorous, or metaphorical meaning.
 
-#### 1. Formulating the Task
-We formulated this task as a **binary classification problem**. Positive samples (Label 1) are pairs of (Meme Image, Meme Caption), and negative samples (Label 0) are pairs of (Meme Image, Literal Image Caption).
+This task is different from retrieval because the model does not need to retrieve the exact caption. Instead, it must decide whether the image-caption relationship is literal or metaphorical.
 
-**Selected Metrics:**
-*   **Accuracy:** Overall percentage of correctly classified pairs.
-*   **F1-Score:** The harmonic mean of precision and recall. This is our primary metric as it balances the model's ability to find all metaphorical captions (recall) without misclassifying literal ones (precision).
-*   **Precision & Recall:** Individual components to monitor for class-specific biases.
-*   **ROC-AUC:** Measures the model's ability to rank metaphorical captions higher than literal ones across all possible classification thresholds.
+---
 
-#### 2. Selected Baseline Strategy
-As an initial baseline, we utilize the **OpenCLIP (ViT-L/14)** dual-encoder. Since CLIP is trained to align images with literal descriptions, we hypothesize that **Literal Image Captions** will exhibit higher visual similarity to the image. 
+### (a) Evaluation Framework and Zero-Shot Baseline
 
-**Classification Heuristic:**
-We compute $P(\text{metaphorical}) = 1 - \cos(e_i, e_c)$. By evaluating this score on the test set, we determine the **optimal similarity threshold** that maximizes the F1-Score.
+As a zero-shot baseline, we used **OpenCLIP ViT-L/14**. Since CLIP is trained to align images with natural language descriptions, we expect literal captions to have higher image-text similarity than metaphorical meme captions.
 
-#### 3. Result Analysis & Rationale for Task 2.2(b)
-The initial zero-shot evaluation yields a decent **F1-Score (0.800)** but a low **ROC-AUC (0.241)**. This highlights a critical **Keyword Bias**: metaphorical captions often contain specific entities (e.g., "Spiderman") that match the visual content perfectly, making a simple similarity threshold insufficient. This confirms the need for dedicated fusion architectures in **Task 2.2(b)**.
+For each image-caption pair, we compute cosine similarity between the image embedding and text embedding:
 
-### (b) MLP Fusion Model
+\[
+s = \cos(e_{\text{image}}, e_{\text{text}})
+\]
 
-To overcome the limitations of zero-shot alignment, we implemented a **Late Fusion MLP** architecture:
-*   **Architecture**: A multi-layer perceptron (MLP) head that takes concatenated CLIP visual and textual embeddings as input.
-*   **Training**: We used frozen **OpenCLIP (ViT-L/14)** backends to pre-extract features, enabling rapid experimentation. The MLP was trained for 10 epochs using Binary Cross-Entropy (BCE) loss.
-*   **Results**: The fusion model significantly improved every metric, achieving near-perfect classification (ROC-AUC: 0.9997). This demonstrates that while CLIP's joint space is biased by literal similarity, the individual embeddings contain sufficient semantic information for a dedicated head to distinguish metaphorical intent.
+Then we define the metaphorical-caption score as:
+
+\[
+P(\text{metaphorical}) = 1 - s
+\]
+
+A higher score means the caption is less literally aligned with the image, so it is more likely to be a meme/metaphorical caption.
+
+To avoid test-set leakage, the threshold was tuned on a validation split from the training set and then evaluated once on the test set.
+
+#### Zero-Shot Results
+
+| Model | Threshold Source | Accuracy | Precision | Recall | F1 | ROC-AUC |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: |
+| OpenCLIP ViT-L/14 Zero-Shot | Validation split | 0.7669 | 0.7681 | 0.9979 | 0.8681 | 0.2447 |
+
+The zero-shot baseline achieves high recall but poor literal-caption recognition. This is visible in the confusion matrix: almost all examples are classified as meme/metaphorical.
+
+![Zero-Shot Confusion Matrix](outputs/caption_classification/zero_shot/confusion_matrix.png)
+
+The score distribution also explains this behavior. The validation-tuned threshold is low, and many literal captions receive scores overlapping with meme captions. This causes the zero-shot method to overpredict the metaphorical class.
+
+![Zero-Shot Score Distribution](outputs/caption_classification/zero_shot/score_histogram.png)
+
+The low ROC-AUC shows that a simple CLIP similarity heuristic is not reliable enough for this classification task. CLIP similarity alone does not consistently rank literal captions above metaphorical captions, especially when meme captions contain visual keywords or entities that also appear in the image.
+
+---
+
+### (b) Supervised Late Fusion MLP
+
+To improve over the zero-shot similarity heuristic, we trained a supervised binary classifier on frozen OpenCLIP embeddings.
+
+For each image-caption pair, we extract:
+
+- a **768-dimensional image embedding** from OpenCLIP,
+- a **768-dimensional text embedding** from OpenCLIP.
+
+These embeddings are concatenated into a 1536-dimensional vector and passed to a trainable MLP classifier.
+
+The final architecture uses:
+
+```text
+Linear(1536 -> 512)
+LayerNorm
+GELU
+Dropout
+
+Linear(512 -> 256)
+LayerNorm
+GELU
+Dropout
+
+Linear(256 -> 1)
+```
+We use BCEWithLogitsLoss for binary classification. The OpenCLIP encoder remains frozen, and only the MLP classifier is trained.
+
+The best checkpoint is selected using validation F1, and the test set is evaluated only once after training. The decision threshold is also selected from the validation set.
+
+#### Supervised MLP Results
+
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Late Fusion MLP | 0.9886 | 0.9973 | 0.9878 | 0.9926 | 0.9995 |
+
+The supervised MLP strongly outperforms the zero-shot baseline. It learns a much better decision boundary between literal and metaphorical captions by using the frozen CLIP image and text embeddings jointly, instead of relying only on their cosine similarity.
+
+The confusion matrix shows that the final classifier makes very few mistakes:
+
+![MLP Confusion Matrix](outputs/caption_classification/train/20260607_230439/eval/confusion_matrix.png)
+
+The score histogram shows a near-complete separation between the two classes. Literal captions receive scores close to 0, while meme/metaphorical captions receive scores close to 1.
+
+![MLP Score Distribution](outputs/caption_classification/train/20260607_230439/eval/score_histogram.png)
+
+The training curve shows that the model fits the task very quickly. Training loss decreases rapidly, while validation loss starts increasing after the early epochs. This suggests that the model can overfit if trained too long, so validation-based checkpoint selection is important.
+
+![Caption Classification Loss Curve](outputs/caption_classification/train/20260607_230439/loss_curve.png)
+
+---
 
 ### (c) Ablation Study
 
-To optimize our Late Fusion MLP and test its stability, we conducted an ablation study modifying various architectural components. We experimented with replacing the standard `ReLU` activation with `GELU`, swapping `BatchNorm` for `LayerNorm` (which is typically more suitable for Transformer embeddings), utilizing `Focal Loss` instead of standard BCE to handle easy examples, and employing an advanced fusion strategy (element-wise multiplication alongside concatenation).
+We also ran ablation experiments to test different classifier design choices.
 
-**Ablation Results Summary:**
-Based on the experiments, utilizing **LayerNorm** with our initial simple concatenation fusion strategy yielded the highest performance across the board. The model achieved a peak F1-Score of **0.993** and an Accuracy of **0.989**. Consequently, this configuration was adopted as our final model for this task.
+The tested modifications included:
+
+- replacing ReLU with GELU,
+- replacing BatchNorm with LayerNorm,
+- changing the fusion structure,
+- testing focal loss,
+- changing regularization settings.
+
+The final model uses **LayerNorm + GELU + simple concatenation fusion**. This configuration was selected because it gave the most stable validation behavior and the best final test performance.
+
+The final result is near-perfect:
+
+| Method | Accuracy | F1 | ROC-AUC |
+| :--- | ---: | ---: | ---: |
+| OpenCLIP Zero-Shot | 0.7669 | 0.8681 | 0.2447 |
+| Supervised Late Fusion MLP | **0.9886** | **0.9926** | **0.9995** |
+
+The main finding is that **CLIP embeddings contain enough information to distinguish literal and metaphorical captions**, but this information is not captured by a simple cosine-similarity threshold. A small supervised MLP over frozen image and text embeddings can learn the required decision boundary very effectively.
 
 ---
 
