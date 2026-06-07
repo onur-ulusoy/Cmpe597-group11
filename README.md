@@ -308,15 +308,15 @@ The supervised MLP strongly outperforms the zero-shot baseline. It learns a much
 
 The confusion matrix shows that the final classifier makes very few mistakes:
 
-![MLP Confusion Matrix](outputs/caption_classification/train/20260607_230439/eval/confusion_matrix.png)
+![MLP Confusion Matrix](outputs/caption_classification/train/20260607_230913/eval/confusion_matrix.png)
 
 The score histogram shows a near-complete separation between the two classes. Literal captions receive scores close to 0, while meme/metaphorical captions receive scores close to 1.
 
-![MLP Score Distribution](outputs/caption_classification/train/20260607_230439/eval/score_histogram.png)
+![MLP Score Distribution](outputs/caption_classification/train/20260607_230913/eval/score_histogram.png)
 
 The training curve shows that the model fits the task very quickly. Training loss decreases rapidly, while validation loss starts increasing after the early epochs. This suggests that the model can overfit if trained too long, so validation-based checkpoint selection is important.
 
-![Caption Classification Loss Curve](outputs/caption_classification/train/20260607_230439/loss_curve.png)
+![Caption Classification Loss Curve](outputs/caption_classification/train/20260607_230913/loss_curve.png)
 
 ---
 
