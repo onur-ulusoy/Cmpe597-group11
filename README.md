@@ -107,7 +107,34 @@ The architecture consists of:
 
 The model is trained using AdamW and a cosine learning rate schedule. We split the training data into train and validation subsets and select the best checkpoint using validation retrieval performance.
 
-The from-scratch model performs far below pretrained CLIP-based models, which is expected because the MemeCap training set is small compared to the web-scale pretraining data used by CLIP. However, it still demonstrates end-to-end cross-modal representation learning from scratch.
+#### Custom Model Results
+
+| Model | Input Type | R@1 (%) | R@5 (%) | R@10 (%) | MRR (%) |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| Custom Architecture From Scratch | Type 1 | 0.18 | 1.25 | 2.68 | 1.46 |
+| Custom Architecture From Scratch | Type 2 | 0.18 | 1.07 | 2.15 | 1.38 |
+
+The from-scratch model performs far below pretrained CLIP-based models, which is expected because the MemeCap training set is small compared to the web-scale pretraining data used by CLIP. However, it still demonstrates an end-to-end attempt to learn a cross-modal image-caption embedding space from raw images and text tokens.
+
+The following training curves and retrieval visualizations show the behavior of the custom model:
+
+**Type 1: Image Only**
+
+![Custom Type 1 Training Loss](outputs/retrieval/custom/type1/loss_curve.png)
+
+![Custom Type 1 Validation Recall](outputs/retrieval/custom/type1/val_recall_curve.png)
+
+![Custom Type 1 Similarity Matrix](outputs/retrieval/custom/type1/type1_similarity_matrix_sample.png)
+
+**Type 2: Image + Title**
+
+![Custom Type 2 Training Loss](outputs/retrieval/custom/type2/loss_curve.png)
+
+![Custom Type 2 Validation Recall](outputs/retrieval/custom/type2/val_recall_curve.png)
+
+![Custom Type 2 Similarity Matrix](outputs/retrieval/custom/type2/type2_similarity_matrix_sample.png)
+
+The loss curves verify that the model is optimizing the contrastive objective, but the validation recall and similarity matrices show that the learned embedding space remains weak for full-gallery retrieval. This supports the main finding that large-scale pretrained vision-language representations are crucial for meme-caption retrieval.
 
 ---
 
@@ -362,12 +389,16 @@ The multimodal model improves over both unimodal baselines in both label setting
 | **OpenCLIP + BLIP Reranker** | Type 2 | 68.16 | 78.89 | - | 73.16 |
 | **SigLIP2 Zero-Shot** | Type 1 | 54.74 | 70.84 | - | 62.54 |
 | **SigLIP2 Zero-Shot** | Type 2 | 23.43 | 38.28 | - | 31.50 |
-| **Custom Architecture From Scratch** | Type 1 | 0.36 | 1.79 | - | 1.77 |
-| **Custom Architecture From Scratch** | Type 2 | 0.54 | 1.61 | - | 1.82 |
+| **Custom Architecture From Scratch** | Type 1 | 0.18 | 1.25 | 2.68 | 1.46 |
+| **Custom Architecture From Scratch** | Type 2 | 0.18 | 1.07 | 2.15 | 1.38 |
 | **CLIP Projection Head** | Type 1 | 34.35 | 55.64 | 64.04 | 44.33 |
 | **CLIP Projection Head** | Type 2 | 29.34 | 52.24 | 62.61 | 40.41 |
 | **OpenCLIP Fine-Tuned LoRA** | Type 1 | 61.85 | 78.35 | 82.64 | 69.30 |
-| **OpenCLIP Fine-Tuned LoRA** | Type 2 | 66.32 | 79.72 | 83.33 | 72.40 |
+| **OpenCLIP Fine-Tuned LoRA** | Type 2 | **66.32** | **79.72** | **83.33** | **72.40** |
+
+The results show a large gap between models trained from scratch and pretrained vision-language models. The custom CNN+GRU dual encoder performs close to random retrieval, which is expected because the MemeCap training set is small and meme-caption alignment is difficult to learn without large-scale pretraining. In contrast, OpenCLIP already provides strong zero-shot retrieval, and LoRA finetuning further improves the pretrained representation.
+
+The CLIP projection-head experiment provides a useful middle ground. It keeps OpenCLIP frozen and trains only small projection heads, improving substantially over the fully custom model while remaining below full LoRA finetuning.
 
 ### Task 2.2: Literal vs. Metaphorical Caption Classification
 
