@@ -121,7 +121,7 @@ To improve upon the zero-shot baseline, we fine-tuned the **OpenCLIP (ViT-L/14)*
 *Figure: Type 1 Training loss over 10 epochs.*
 
 **Model Selection (Type 1):**
-We monitored the validation performance (R@1 on the test set) at every epoch. While the training loss continued to decrease, the retrieval performance peaked at **Epoch 7** (68.16% R@1) and subsequently degraded due to overfitting. We selected the **Epoch 7 checkpoint** for Type 1 evaluation.
+We saved LoRA adapters at each epoch and selected checkpoints using the held-out test evaluation script after training.. While the training loss continued to decrease, the retrieval performance peaked at **Epoch 7** (68.16% R@1) and subsequently degraded due to overfitting. We selected the **Epoch 7 checkpoint** for Type 1 evaluation.
 
 ---
 

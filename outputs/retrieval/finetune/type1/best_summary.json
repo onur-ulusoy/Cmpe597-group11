@@ -1,0 +1,16 @@
+{
+    "task": "type1",
+    "best_epoch": 2,
+    "best_score": 1.0927835051546393,
+    "best_metrics": {
+        "R@1": 0.6185567010309279,
+        "R@5": 0.7835051546391752,
+        "R@10": 0.8264604810996563,
+        "MedR": 1,
+        "MeanR": 17.587628865979383,
+        "MRR": 0.6930850862719528
+    },
+    "best_adapter": "outputs/retrieval/finetune/type1/best_lora",
+    "run_dir": "outputs/retrieval/finetune/type1/20260607_173524",
+    "fusion_alpha": 0.5
+}
