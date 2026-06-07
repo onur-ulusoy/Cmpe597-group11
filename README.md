@@ -489,14 +489,16 @@ The CLIP projection-head experiment provides a useful middle ground. It keeps Op
 ### Task 2.2: Literal vs. Metaphorical Caption Classification
 
 | Strategy / Architecture Variation | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Zero-Shot ($1-\text{Sim}$)** | 0.667 | - | - | 0.800 | 0.241 |
-| **MLP Base (BatchNorm + ReLU)** | 0.987 | 0.998 | 0.984 | 0.991 | **0.999** |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **Zero-Shot OpenCLIP (`1 - similarity`)** | 0.767 | 0.768 | **0.998** | 0.868 | 0.245 |
+| **MLP Base (BatchNorm + ReLU)** | 0.987 | 0.998 | 0.984 | 0.991 | 0.999 |
 | **Ablation: GELU Activation** | 0.971 | 0.998 | 0.962 | 0.980 | 0.999 |
 | **Ablation: Focal Loss** | 0.983 | 0.998 | 0.978 | 0.988 | 0.999 |
 | **Ablation: Advanced Fusion** | 0.983 | **0.999** | 0.978 | 0.989 | 0.999 |
 | **Ablation: Adv. Fusion + LayerNorm** | 0.983 | **0.999** | 0.978 | 0.989 | 0.999 |
-| **Final Selected Model (LayerNorm)** | **0.989** | 0.994 | **0.991** | **0.993** | **0.999** |
+| **Final Selected Model (LayerNorm + GELU)** | **0.989** | 0.997 | 0.988 | **0.993** | **1.000** |
+
+The zero-shot OpenCLIP baseline achieves high recall but poor ROC-AUC, showing that a simple similarity threshold tends to overpredict the meme/metaphorical class. In contrast, the supervised late-fusion MLP learns a much cleaner decision boundary from frozen CLIP image and text embeddings. The final selected model uses **LayerNorm + GELU** and achieves the strongest overall result, with **0.989 accuracy**, **0.993 F1**, and **0.9995 ROC-AUC**.
 
 ### Task 2.3: Meme Sentiment Classification (7-Class)
 
