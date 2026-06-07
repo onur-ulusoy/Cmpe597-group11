@@ -1,0 +1,1172 @@
+[
+    {
+        "query_index": 0,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_d079np.png",
+        "title": "He did it",
+        "correct_caption": "Husband feels great after having their wife fall in love with him again after getting amnesia.",
+        "correct_rank": 393,
+        "top_retrieved": [
+            {
+                "candidate_index": 379,
+                "score": 0.5927487015724182,
+                "caption": "The meme poster is confidently applauding people for being irritable, depressed, and tired of life.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 205,
+                "score": 0.5594648718833923,
+                "caption": "The meme poster posts different memes and does not reuse them arbitrarily.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 2,
+                "score": 0.5502021312713623,
+                "caption": "The Simpsons was correct about it's use of Trump and Greta Thurnberg.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 327,
+                "score": 0.5332974791526794,
+                "caption": "The meme poster describes that, we're polluting the world for over 3 generations.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 149,
+                "score": 0.5267201066017151,
+                "caption": "Meme poster made a light comment and two groups of people went crazy in the comment section and meme poster is enjoying watching the drama unfold.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 1,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_d2rm3s.png",
+        "title": "One apple a year keeps your wallet empty",
+        "correct_caption": "Meme poster is not interested in paying for a new phone just for an added camera.",
+        "correct_rank": 95,
+        "top_retrieved": [
+            {
+                "candidate_index": 321,
+                "score": 0.4909806549549103,
+                "caption": "Meme poster believes they will win the lottery and won't listen to others.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 6,
+                "score": 0.4846014380455017,
+                "caption": "The person who wrote the is comparing saying Americans don't believe in free healthcare",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 111,
+                "score": 0.4731734097003937,
+                "caption": "Meme poster is trying to convey that MrBeast doesn't have the most appealing thumbnails.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 386,
+                "score": 0.46639832854270935,
+                "caption": "Meme poster is happy someone is calling him and not having to take the call.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 267,
+                "score": 0.4657059907913208,
+                "caption": "The meme poster is saying that their friends show up to school wearing the same costume for Halloween.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 2,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_d9gvok.png",
+        "title": "Simpsons predicted it yet again",
+        "correct_caption": "The Simpsons was correct about it's use of Trump and Greta Thurnberg.",
+        "correct_rank": 396,
+        "top_retrieved": [
+            {
+                "candidate_index": 45,
+                "score": 0.4988968074321747,
+                "caption": "Meme poster is trying to convey that they wake up their sleepy dog with love and affection.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 14,
+                "score": 0.4972280263900757,
+                "caption": "Meme poster lied to the magician during a show and both can't do anything.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 316,
+                "score": 0.4893881380558014,
+                "caption": "Meme poster made their own take on Thanos and Infinity war.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 359,
+                "score": 0.4876405894756317,
+                "caption": "Meme poster took all the money out of their bank account at costco.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 103,
+                "score": 0.4680015742778778,
+                "caption": "Meme poster is conveying the annoyance at their parents turning their humor into discipline",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 3,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_eimmhx.png",
+        "title": "*happy bubonic noises*",
+        "correct_caption": "Meme poster realizes there's always a mass plague in the 20s.",
+        "correct_rank": 200,
+        "top_retrieved": [
+            {
+                "candidate_index": 110,
+                "score": 0.5340821743011475,
+                "caption": "Poster is grimaced at the idea of trying and failing rather than not try at all.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 497,
+                "score": 0.5263069272041321,
+                "caption": "The meme poster is mad at his parents for making fun of him in front of others for their own happiness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 8,
+                "score": 0.5254685282707214,
+                "caption": "Meme poster is making fun of the FBI for monitoring memes online.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 448,
+                "score": 0.5246375203132629,
+                "caption": "The meme poster is pursuing art school for 25k to get escape from the society's labeling of illiterate.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 323,
+                "score": 0.5056764483451843,
+                "caption": "Meme poster is conveying some random people advising the meme poster about the reality of airdrops.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 4,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_er70xq.png",
+        "title": "Poor yoda",
+        "correct_caption": "Meme poster can relate to a parent being sick and tired of questions.",
+        "correct_rank": 254,
+        "top_retrieved": [
+            {
+                "candidate_index": 301,
+                "score": 0.6296079754829407,
+                "caption": "Meme poster is trying to convey their friend apologizes for the mess when the meme poster can't spot anything wrong.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 472,
+                "score": 0.584928572177887,
+                "caption": "Meme poster is trying to convey their interpretation of what the character they were expecting based on their experience.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 81,
+                "score": 0.5536131262779236,
+                "caption": "Meme poster is trying to convey dog's taunt their owners while they are taking poops.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 218,
+                "score": 0.5495696067810059,
+                "caption": "Meme poster is conveying a random guy built a folding iPhone years before Apple made it a thing.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 177,
+                "score": 0.5418100357055664,
+                "caption": "Meme poster is trying to convey their surprise at finding this random coconut drink and the serendipitous feeling of trying it for the first time.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 5,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_eysyoj.png",
+        "title": "Big brain",
+        "correct_caption": "Meme poster is annoyed with anti-vaxxer logic.",
+        "correct_rank": 208,
+        "top_retrieved": [
+            {
+                "candidate_index": 472,
+                "score": 0.5596878528594971,
+                "caption": "Meme poster is trying to convey their interpretation of what the character they were expecting based on their experience.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 487,
+                "score": 0.5518807768821716,
+                "caption": "Meme poster thinks Kanye West is really the same as the black racist character from a Dave Chapelle sketch.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 364,
+                "score": 0.5478283166885376,
+                "caption": "The guidance counsellor is learning the meme poster's future is barren.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 385,
+                "score": 0.546602189540863,
+                "caption": "The meme poster is trying to be beyond the gender pronouns and ready to pass the situation.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 301,
+                "score": 0.525141179561615,
+                "caption": "Meme poster is trying to convey their friend apologizes for the mess when the meme poster can't spot anything wrong.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 6,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_f0oq4v.png",
+        "title": "Americans when they wake up: *angry noises*",
+        "correct_caption": "The person who wrote the is comparing saying Americans don't believe in free healthcare",
+        "correct_rank": 130,
+        "top_retrieved": [
+            {
+                "candidate_index": 68,
+                "score": 0.5623717904090881,
+                "caption": "Meme poster understands the Call of Duty mission sounds bad when you say it out loud but plays well.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 354,
+                "score": 0.5266386270523071,
+                "caption": "Meme poster is trying to convey that their parents claim the trip will be 2 hours long but they bring an abundance of items that crowd the car.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 314,
+                "score": 0.5246884822845459,
+                "caption": "Meme poster is trying to convey that after sitting for so long, one of his legs starts going to sleep and then standing up causes it to feel funny.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 534,
+                "score": 0.5032398700714111,
+                "caption": "Meme poster makes a mask of themselves which looks weird when it's on other people.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 136,
+                "score": 0.5020508766174316,
+                "caption": "Meme poster is trying to convey that the dog mistakes the owner for moving their leg in their sleep as getting ready to get up.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 7,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_fat6rn.png",
+        "title": "Ez Harvard admission",
+        "correct_caption": "Meme poster is mad that colleges will pay your way if you are an athlete, but not as much for academics.",
+        "correct_rank": 237,
+        "top_retrieved": [
+            {
+                "candidate_index": 301,
+                "score": 0.5650423169136047,
+                "caption": "Meme poster is trying to convey their friend apologizes for the mess when the meme poster can't spot anything wrong.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 177,
+                "score": 0.5576632022857666,
+                "caption": "Meme poster is trying to convey their surprise at finding this random coconut drink and the serendipitous feeling of trying it for the first time.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 472,
+                "score": 0.5501600503921509,
+                "caption": "Meme poster is trying to convey their interpretation of what the character they were expecting based on their experience.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 81,
+                "score": 0.5469018816947937,
+                "caption": "Meme poster is trying to convey dog's taunt their owners while they are taking poops.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 330,
+                "score": 0.5334683060646057,
+                "caption": "Meme poster is looking forward to paying off all of their debt in the very distant future.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 8,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_fjiz2r.png",
+        "title": "You think you are sad",
+        "correct_caption": "Meme poster is making fun of the FBI for monitoring memes online.",
+        "correct_rank": 485,
+        "top_retrieved": [
+            {
+                "candidate_index": 84,
+                "score": 0.6054756045341492,
+                "caption": "Meme poster realizes ai memes can hurt them despite what their therapist say.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 421,
+                "score": 0.6049701571464539,
+                "caption": "Poster thinks most 2000's horror movies are predictable.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 151,
+                "score": 0.5426635146141052,
+                "caption": "Meme poster has decided to celebrate their reddit anniversary by eating really gross pizza dipped in milk.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 95,
+                "score": 0.5413298010826111,
+                "caption": "Poster thinks being a business woman means sexual harassment with lower pay.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 5,
+                "score": 0.5187250971794128,
+                "caption": "Meme poster is annoyed with anti-vaxxer logic.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 9,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_fz7bbd.png",
+        "title": "Bow to me",
+        "correct_caption": "Meme poster felt they conquered water when they opened their eyes in the pool when they were 8.",
+        "correct_rank": 251,
+        "top_retrieved": [
+            {
+                "candidate_index": 1,
+                "score": 0.5746186375617981,
+                "caption": "Meme poster is not interested in paying for a new phone just for an added camera.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 124,
+                "score": 0.5622366666793823,
+                "caption": "Meme poster appreciates their only two followers and one of them is their alternative account.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 526,
+                "score": 0.5481730699539185,
+                "caption": "Meme poster is able to deny peer pressure to use drugs by not going out anywhere and memeing at their computer.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 352,
+                "score": 0.5336962938308716,
+                "caption": "The meme poster gives which is precious to him and the farmer gives what he preciously has.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 494,
+                "score": 0.5201399922370911,
+                "caption": "The meme poster mocks the security guard and the entry.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 10,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_gxnnyn.png",
+        "title": "I do be like that",
+        "correct_caption": "Meme poster is mad that Netflix/tv shows/movies use adults who are in their 30's to play high school students.",
+        "correct_rank": 451,
+        "top_retrieved": [
+            {
+                "candidate_index": 4,
+                "score": 0.5473706722259521,
+                "caption": "Meme poster can relate to a parent being sick and tired of questions.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 231,
+                "score": 0.5335517525672913,
+                "caption": "The meme poster is describing the value of getting more upvotes than to getting more comments on the reddit platform.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 38,
+                "score": 0.5202845335006714,
+                "caption": "Meme poster is trying to convey that cat and dog owners are very different when it comes to strangers petting their animals.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 129,
+                "score": 0.5181352496147156,
+                "caption": "Meme poster is trying to convey that men who say \"happy wife, happy life\" are actually just scared of their wives.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 515,
+                "score": 0.5165560245513916,
+                "caption": "Meme poster is trying to convey that the internet loves attacking Kanye for his recent comments but now it is just piling on.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 11,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_gy6y78.png",
+        "title": "Take note pls",
+        "correct_caption": "Meme poster warns people of real life dangers of using a toilet in their dream.",
+        "correct_rank": 90,
+        "top_retrieved": [
+            {
+                "candidate_index": 19,
+                "score": 0.5028423070907593,
+                "caption": "Elon Musk developing brain chips will result in the meme poster being kept awake by ads at 3 am.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 238,
+                "score": 0.500124454498291,
+                "caption": "Meme poster feels gross about how Disney market use their characters when seeing an ad for baby yoda toothpaste cap.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 433,
+                "score": 0.49235740303993225,
+                "caption": "The meme poster mocks FBI agent over the meme poster's plan of conquering the British at its cruel time.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 441,
+                "score": 0.4785405993461609,
+                "caption": "Meme poster reveals John Cena's first acting credit.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 409,
+                "score": 0.4729755222797394,
+                "caption": "Meme poster likes ranch more than blue cheese.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 12,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hamwzf.png",
+        "title": "One of the happiest moments in life",
+        "correct_caption": "The protester is happy to see the fbi agent after the riot.",
+        "correct_rank": 130,
+        "top_retrieved": [
+            {
+                "candidate_index": 294,
+                "score": 0.473818838596344,
+                "caption": "The meme poster is mocking NATO for imposing new sanctions rather than Article 5, after the missile attack.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 303,
+                "score": 0.47110363841056824,
+                "caption": "Meme poster is trying to convey that they confused the heck out of himself for sending the wrong professor with the wrong project.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 127,
+                "score": 0.46828338503837585,
+                "caption": "Meme poster is all alone in the house after entirely cleaning his house.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 433,
+                "score": 0.4535406827926636,
+                "caption": "The meme poster mocks FBI agent over the meme poster's plan of conquering the British at its cruel time.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 69,
+                "score": 0.44993171095848083,
+                "caption": "The meme poster needs sleep more than projects need to get done.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 13,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hg2c5y.png",
+        "title": "One tiny error",
+        "correct_caption": "Poster is amused at Kitkat's tone deafness.",
+        "correct_rank": 264,
+        "top_retrieved": [
+            {
+                "candidate_index": 200,
+                "score": 0.5429999232292175,
+                "caption": "Meme poster is conveying the drugs as a means of heightening serotonin, but not as a good idea.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 213,
+                "score": 0.5360679030418396,
+                "caption": "Meme poster thinks Elon Musk would choose drawing 25 uno cards instead of staying on the planet.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 340,
+                "score": 0.5304708480834961,
+                "caption": "Meme poster is happy the teacher is throwing a pizza party until he sees the sizes.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 252,
+                "score": 0.5116446018218994,
+                "caption": "Meme poster is trying to convey tortilla companies got so rich off of tacos and burritos.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 311,
+                "score": 0.507413923740387,
+                "caption": "The meme poster thinks the future cameraman would be filming in the space as opposed to the current ones running with the camera on the ground.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 14,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hmq8qx.png",
+        "title": "Based on a true story",
+        "correct_caption": "Meme poster lied to the magician during a show and both can't do anything.",
+        "correct_rank": 293,
+        "top_retrieved": [
+            {
+                "candidate_index": 510,
+                "score": 0.5782269239425659,
+                "caption": "Meme poster is sad their mom keeps meeting new men.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 436,
+                "score": 0.5618416666984558,
+                "caption": "Meme poster thinks Instagram models pop their body parts out sexually to get the likes a lot more than normal people.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 53,
+                "score": 0.5421103835105896,
+                "caption": "Your friend will always give you the bad controller when gaming at their house.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 349,
+                "score": 0.516787052154541,
+                "caption": "Meme poster is trying to convey that you never know what you'll get if you live in oklahoma",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 68,
+                "score": 0.5084355473518372,
+                "caption": "Meme poster understands the Call of Duty mission sounds bad when you say it out loud but plays well.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 15,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hmv62q.png",
+        "title": "I couldn't resist. Enjoy.",
+        "correct_caption": "Meme poster is trying to convey that their dog is always begging for food.",
+        "correct_rank": 68,
+        "top_retrieved": [
+            {
+                "candidate_index": 502,
+                "score": 0.5691105723381042,
+                "caption": "Meme poster is conveying that the best meme of all time has returned to the site.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 515,
+                "score": 0.5473209023475647,
+                "caption": "Meme poster is trying to convey that the internet loves attacking Kanye for his recent comments but now it is just piling on.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 334,
+                "score": 0.5381829738616943,
+                "caption": "Meme poster is happy to see the field of weed.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 347,
+                "score": 0.5339645743370056,
+                "caption": "Meme poster is trying to convey the billionaires are actually hated unlike the sign.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 122,
+                "score": 0.5317846536636353,
+                "caption": "Meme poster is trying to convey that the group he plays with he still plays with now to this day.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 16,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hv72fd.png",
+        "title": "Well done",
+        "correct_caption": "Poster argues with another person about his intelligence.",
+        "correct_rank": 194,
+        "top_retrieved": [
+            {
+                "candidate_index": 421,
+                "score": 0.6011037230491638,
+                "caption": "Poster thinks most 2000's horror movies are predictable.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 468,
+                "score": 0.49240878224372864,
+                "caption": "Meme poster is trying to say Americans are protective about the game of football in America",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 21,
+                "score": 0.4592399001121521,
+                "caption": "Poster thinks Twitch is not worried about his participation.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 13,
+                "score": 0.45320895314216614,
+                "caption": "Poster is amused at Kitkat's tone deafness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 500,
+                "score": 0.45149126648902893,
+                "caption": "Meme poster is trying to convey that going on Reddit means he will find out the shady stuff about Kanye West.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 17,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hypmff.png",
+        "title": "I Love When They Think We Dont See Them",
+        "correct_caption": "Meme poster thinks its funny that lizards sit in easily visible places during the summer and act like they are surprised if a person notices them.",
+        "correct_rank": 97,
+        "top_retrieved": [
+            {
+                "candidate_index": 427,
+                "score": 0.5653631687164307,
+                "caption": "The meme poster gives a weird reaction when it realizes that someone didn't tell him that the spoon doesn't actually sound like airplanes.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 474,
+                "score": 0.5501514673233032,
+                "caption": "Meme poster is trying to convey that they don't like it when chain restaurants microwave their food.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 26,
+                "score": 0.5434651374816895,
+                "caption": "Meme poster feels like they deserve relaxation after coming up with a title for their writing assignment.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 25,
+                "score": 0.5331343412399292,
+                "caption": "Meme poster didn't realize they could get diabetes from drinking so much red bull.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 537,
+                "score": 0.5300595760345459,
+                "caption": "Meme poster gets stressed out when their man asks how much they spent shopping online.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 18,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_i5w6m3.png",
+        "title": "I am a bot and this was performed automatically.",
+        "correct_caption": "Meme poster will walk on curb because it is a automatic impulse even if it doesn't make sense to their mom.",
+        "correct_rank": 80,
+        "top_retrieved": [
+            {
+                "candidate_index": 369,
+                "score": 0.589815616607666,
+                "caption": "Meme poster feels better paying $25 for a product with no shipping then paying $20 for something and $5 for shipping.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 498,
+                "score": 0.5860759615898132,
+                "caption": "Meme poster thought it was a short nap but it was years long.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 241,
+                "score": 0.582389771938324,
+                "caption": "The poster has been on reddit for years and is making a bad meme.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 546,
+                "score": 0.5543254017829895,
+                "caption": "Meme poster feels overwhelmed and needs help solving simple and easy problems they can solve themselves.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 265,
+                "score": 0.5481981635093689,
+                "caption": "Meme poster is trying to convey that the meme they had in their folder has a format they don't remember and the meme creators want to know the source badly.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 19,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_i8tn53.png",
+        "title": "brain ads",
+        "correct_caption": "Elon Musk developing brain chips will result in the meme poster being kept awake by ads at 3 am.",
+        "correct_rank": 128,
+        "top_retrieved": [
+            {
+                "candidate_index": 0,
+                "score": 0.6333319544792175,
+                "caption": "Husband feels great after having their wife fall in love with him again after getting amnesia.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 510,
+                "score": 0.6264156699180603,
+                "caption": "Meme poster is sad their mom keeps meeting new men.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.6181864142417908,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 279,
+                "score": 0.6113987565040588,
+                "caption": "Meme poster thinks British people decide to build an empire after everyone else had their turn.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 406,
+                "score": 0.5788290500640869,
+                "caption": "Meme poster is trying to act calm when somebody sneezes but is internally freaking out.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 20,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_it6820.png",
+        "title": "Oh look, Reddit",
+        "correct_caption": "Meme poster is trying to convey that they're addicted to Reddit.",
+        "correct_rank": 50,
+        "top_retrieved": [
+            {
+                "candidate_index": 556,
+                "score": 0.6125611662864685,
+                "caption": "Meme poster is trying to convey that people in Ohio need special help when they are dancing around.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 160,
+                "score": 0.577462375164032,
+                "caption": "Meme poster is trying to convey that he is refusing to do that work allotted to him.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 387,
+                "score": 0.5448376536369324,
+                "caption": "Meme poster is trying to convey this is the look they make when they are being watched",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 373,
+                "score": 0.5369711518287659,
+                "caption": "Meme poster is trying to convey that american non soccer fans are happy to not fight about soccer vs football.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 501,
+                "score": 0.520949125289917,
+                "caption": "Meme poster is trying to convey that they're fantasizing about breaking the rules and bringing their phone to school.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 21,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_iyv1uh.png",
+        "title": "It's annoying af",
+        "correct_caption": "Poster thinks Twitch is not worried about his participation.",
+        "correct_rank": 553,
+        "top_retrieved": [
+            {
+                "candidate_index": 514,
+                "score": 0.5058643221855164,
+                "caption": "The meme poster enjoys the reviews of a mission in a Video game after he finished that mission.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 122,
+                "score": 0.5025538206100464,
+                "caption": "Meme poster is trying to convey that the group he plays with he still plays with now to this day.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 394,
+                "score": 0.48937463760375977,
+                "caption": "Meme poster is trying to convey that this is the face they make siriusxm makes edits to a song they are listening too",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 137,
+                "score": 0.4803664982318878,
+                "caption": "Meme poster is happy to attend a open house on the home they want.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 182,
+                "score": 0.46901214122772217,
+                "caption": "Meme poster is trying to convey that people look cool when they are cleaning with music except for the poster.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 22,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_j32ep7.png",
+        "title": "Doot Doot!",
+        "correct_caption": "Meme poster is trying to convey that once Halloween is coming back everyone will post skeleton memes",
+        "correct_rank": 303,
+        "top_retrieved": [
+            {
+                "candidate_index": 177,
+                "score": 0.5305923819541931,
+                "caption": "Meme poster is trying to convey their surprise at finding this random coconut drink and the serendipitous feeling of trying it for the first time.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 81,
+                "score": 0.527815580368042,
+                "caption": "Meme poster is trying to convey dog's taunt their owners while they are taking poops.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 213,
+                "score": 0.527480959892273,
+                "caption": "Meme poster thinks Elon Musk would choose drawing 25 uno cards instead of staying on the planet.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 472,
+                "score": 0.5265094637870789,
+                "caption": "Meme poster is trying to convey their interpretation of what the character they were expecting based on their experience.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 330,
+                "score": 0.5214486718177795,
+                "caption": "Meme poster is looking forward to paying off all of their debt in the very distant future.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 23,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_j3qvhf.png",
+        "title": "Real SOMA ULTE",
+        "correct_caption": "Poster thinks that the satisfaction of finding someone with a matching shirt is more than planning to have matching shirts.",
+        "correct_rank": 90,
+        "top_retrieved": [
+            {
+                "candidate_index": 213,
+                "score": 0.5793003439903259,
+                "caption": "Meme poster thinks Elon Musk would choose drawing 25 uno cards instead of staying on the planet.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 177,
+                "score": 0.567441999912262,
+                "caption": "Meme poster is trying to convey their surprise at finding this random coconut drink and the serendipitous feeling of trying it for the first time.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 330,
+                "score": 0.5639051795005798,
+                "caption": "Meme poster is looking forward to paying off all of their debt in the very distant future.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 364,
+                "score": 0.5245206952095032,
+                "caption": "The guidance counsellor is learning the meme poster's future is barren.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 472,
+                "score": 0.5239863991737366,
+                "caption": "Meme poster is trying to convey their interpretation of what the character they were expecting based on their experience.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 24,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_jht4yd.png",
+        "title": "Everybody's dumb but me",
+        "correct_caption": "The teacher thinks a student is smart because they know a random element, but the meme poster feels smarter because he watched Avatar and knows the real elements.",
+        "correct_rank": 309,
+        "top_retrieved": [
+            {
+                "candidate_index": 271,
+                "score": 0.5464683175086975,
+                "caption": "Meme poster is trying to convey how different it feels listening to Boney M's song about a crazed Russian historical figure Rasputin in light of the current geopolitical tensions with Russia.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 68,
+                "score": 0.5028900504112244,
+                "caption": "Meme poster understands the Call of Duty mission sounds bad when you say it out loud but plays well.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 7,
+                "score": 0.49495410919189453,
+                "caption": "Meme poster is mad that colleges will pay your way if you are an athlete, but not as much for academics.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 78,
+                "score": 0.4846174120903015,
+                "caption": "Meme poster is trying to convey that in horror games, without a weapon you're helpless, but once you get one you're not.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 393,
+                "score": 0.4527999460697174,
+                "caption": "Spider phobic people freak out at the smallest one but they are a fact of life.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 25,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_jwzd2u.png",
+        "title": "false advertisement",
+        "correct_caption": "Meme poster didn't realize they could get diabetes from drinking so much red bull.",
+        "correct_rank": 243,
+        "top_retrieved": [
+            {
+                "candidate_index": 156,
+                "score": 0.6440533995628357,
+                "caption": "Meme poster is trying to convey that if you are trying to help a hot girl, her step brother will beat you to it.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 488,
+                "score": 0.6335123777389526,
+                "caption": "Meme poster is trying to convey that no villain can beat a hero that just learned the value of friendship.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 349,
+                "score": 0.6252655982971191,
+                "caption": "Meme poster is trying to convey that you never know what you'll get if you live in oklahoma",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 509,
+                "score": 0.6059557795524597,
+                "caption": "Meme poster is trying to convey that the Internet doesn't feel guilt for destroying Kayne West's career.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 540,
+                "score": 0.5912398099899292,
+                "caption": "Meme poster is trying to convey that internet trolls are only brave because their face is hidden",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 26,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_k4xv8c.png",
+        "title": "I deserve it",
+        "correct_caption": "Meme poster feels like they deserve relaxation after coming up with a title for their writing assignment.",
+        "correct_rank": 263,
+        "top_retrieved": [
+            {
+                "candidate_index": 321,
+                "score": 0.5282257199287415,
+                "caption": "Meme poster believes they will win the lottery and won't listen to others.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 86,
+                "score": 0.5184213519096375,
+                "caption": "Customers don't want the products of their youth updated for the modern times.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 443,
+                "score": 0.5168941020965576,
+                "caption": "Meme poster is trying to convey they don't agree with this gender trend that is happening with society.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 198,
+                "score": 0.5161288976669312,
+                "caption": "Meme poster regrets selling their PlayStation 4 because they see everyone else enjoying the new God of War game for the system and now they are unable to play the game and enjoy it along with everyone else.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 122,
+                "score": 0.5091281533241272,
+                "caption": "Meme poster is trying to convey that the group he plays with he still plays with now to this day.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 27,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_k83rjb.png",
+        "title": "I do it every time",
+        "correct_caption": "Meme poster is trying to convey that they watch movies differently than other people.",
+        "correct_rank": 123,
+        "top_retrieved": [
+            {
+                "candidate_index": 198,
+                "score": 0.6214616894721985,
+                "caption": "Meme poster regrets selling their PlayStation 4 because they see everyone else enjoying the new God of War game for the system and now they are unable to play the game and enjoy it along with everyone else.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 24,
+                "score": 0.5806257724761963,
+                "caption": "The teacher thinks a student is smart because they know a random element, but the meme poster feels smarter because he watched Avatar and knows the real elements.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 212,
+                "score": 0.5800995826721191,
+                "caption": "Meme poster has to select where they want to pee but society makes it so it can only be the toilet.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 539,
+                "score": 0.5780216455459595,
+                "caption": "Meme poster doesn't seem the difference between the Kingpin comic book villain and Jeff Bezos.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 208,
+                "score": 0.5688316226005554,
+                "caption": "The meme poster doesn't want to buy Girl Scout cookies.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 28,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_kds715.png",
+        "title": "The Return of the [paper] King",
+        "correct_caption": "People, especially men and kids, use empty wrapping paper tubes as swords, so anyone that has one, will use it that way and be so excited about it.",
+        "correct_rank": 406,
+        "top_retrieved": [
+            {
+                "candidate_index": 447,
+                "score": 0.45475491881370544,
+                "caption": "Meme poster is trying to convey their confusion at what to order at a restaurant after not looking at the menu",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 511,
+                "score": 0.45216238498687744,
+                "caption": "Meme poster is trying to sneak into their own laptop and accounts.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 204,
+                "score": 0.444113552570343,
+                "caption": "Meme poster is trying to convey that the BMW riding his tail should have gone around him the whole time instead of tailing him.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 283,
+                "score": 0.4439120590686798,
+                "caption": "Meme poster lost power and is about to avenge.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 103,
+                "score": 0.43001312017440796,
+                "caption": "Meme poster is conveying the annoyance at their parents turning their humor into discipline",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 29,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_kq9d2b.png",
+        "title": "Looking good bro",
+        "correct_caption": "Meme poster is trying to convey the differences between how men and women use filters on Snapchat.",
+        "correct_rank": 56,
+        "top_retrieved": [
+            {
+                "candidate_index": 387,
+                "score": 0.5369376540184021,
+                "caption": "Meme poster is trying to convey this is the look they make when they are being watched",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 380,
+                "score": 0.48901253938674927,
+                "caption": "Meme poster is trying to convey that  Every great video game is a little weird while Call of Duty games are cheap knockoffs now.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 431,
+                "score": 0.4856472313404083,
+                "caption": "Meme poster is trying to convey that children make strange choices when it comes to which strangers are and are not dangerous.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 22,
+                "score": 0.4726245105266571,
+                "caption": "Meme poster is trying to convey that once Halloween is coming back everyone will post skeleton memes",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 496,
+                "score": 0.467426598072052,
+                "caption": "Meme poster is trying to convey a homie decides to take the path of friendship rather than the dark side they have been before.",
+                "is_correct": false
+            }
+        ]
+    }
+]

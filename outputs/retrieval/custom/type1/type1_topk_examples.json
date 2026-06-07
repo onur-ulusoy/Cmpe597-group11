@@ -1,0 +1,1172 @@
+[
+    {
+        "query_index": 0,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_d079np.png",
+        "title": "He did it",
+        "correct_caption": "Husband feels great after having their wife fall in love with him again after getting amnesia.",
+        "correct_rank": 488,
+        "top_retrieved": [
+            {
+                "candidate_index": 434,
+                "score": 0.39620241522789,
+                "caption": "The meme poster is disgusted by the activity and receives an apology from his mate.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 124,
+                "score": 0.3954242467880249,
+                "caption": "Meme poster appreciates their only two followers and one of them is their alternative account.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 140,
+                "score": 0.3914228081703186,
+                "caption": "Meme poster thinks the government is bad at making websites.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 358,
+                "score": 0.3894117474555969,
+                "caption": "The meme poster is expressing its craze about a song and how it is hiding its reaction from people.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 143,
+                "score": 0.3875696361064911,
+                "caption": "Meme poster thinks they will conquer Germany by using a online language app.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 1,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_d2rm3s.png",
+        "title": "One apple a year keeps your wallet empty",
+        "correct_caption": "Meme poster is not interested in paying for a new phone just for an added camera.",
+        "correct_rank": 188,
+        "top_retrieved": [
+            {
+                "candidate_index": 434,
+                "score": 0.40412405133247375,
+                "caption": "The meme poster is disgusted by the activity and receives an apology from his mate.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 124,
+                "score": 0.40401849150657654,
+                "caption": "Meme poster appreciates their only two followers and one of them is their alternative account.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 140,
+                "score": 0.40231379866600037,
+                "caption": "Meme poster thinks the government is bad at making websites.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 358,
+                "score": 0.39647504687309265,
+                "caption": "The meme poster is expressing its craze about a song and how it is hiding its reaction from people.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 143,
+                "score": 0.395944207906723,
+                "caption": "Meme poster thinks they will conquer Germany by using a online language app.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 2,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_d9gvok.png",
+        "title": "Simpsons predicted it yet again",
+        "correct_caption": "The Simpsons was correct about it's use of Trump and Greta Thurnberg.",
+        "correct_rank": 480,
+        "top_retrieved": [
+            {
+                "candidate_index": 75,
+                "score": 0.41840633749961853,
+                "caption": "The poster is not interested in the Elon's twitter drama.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 308,
+                "score": 0.4156922698020935,
+                "caption": "Meme poster does not see the difference between the two robots.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 434,
+                "score": 0.41454601287841797,
+                "caption": "The meme poster is disgusted by the activity and receives an apology from his mate.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 247,
+                "score": 0.4136336147785187,
+                "caption": "The meme poster describes that, though he have lot of words in his mind, he uses very few of his talent while writing an essay.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 358,
+                "score": 0.41154178977012634,
+                "caption": "The meme poster is expressing its craze about a song and how it is hiding its reaction from people.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 3,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_eimmhx.png",
+        "title": "*happy bubonic noises*",
+        "correct_caption": "Meme poster realizes there's always a mass plague in the 20s.",
+        "correct_rank": 370,
+        "top_retrieved": [
+            {
+                "candidate_index": 245,
+                "score": 0.379669725894928,
+                "caption": "Meme poster thinks artists augment their work by adding audio.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 283,
+                "score": 0.378574937582016,
+                "caption": "Meme poster lost power and is about to avenge.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 13,
+                "score": 0.37782803177833557,
+                "caption": "Poster is amused at Kitkat's tone deafness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 249,
+                "score": 0.3770056962966919,
+                "caption": "Meme poster is trying to avoid video game leaks but can't avoid them.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 151,
+                "score": 0.37559184432029724,
+                "caption": "Meme poster has decided to celebrate their reddit anniversary by eating really gross pizza dipped in milk.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 4,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_er70xq.png",
+        "title": "Poor yoda",
+        "correct_caption": "Meme poster can relate to a parent being sick and tired of questions.",
+        "correct_rank": 96,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.4717560112476349,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.46227526664733887,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 246,
+                "score": 0.45669516921043396,
+                "caption": "Meme poster is conveying that every time you try to install something on your computer mcafee pops up to be annoying and makes it more difficult than it needs to be.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 396,
+                "score": 0.4555897116661072,
+                "caption": "Meme poster uses his own mom's words against her in a argument.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.45444783568382263,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 5,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_eysyoj.png",
+        "title": "Big brain",
+        "correct_caption": "Meme poster is annoyed with anti-vaxxer logic.",
+        "correct_rank": 337,
+        "top_retrieved": [
+            {
+                "candidate_index": 114,
+                "score": 0.40398159623146057,
+                "caption": "Meme poster thinks the little girl doesn't separate reality from fiction.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 546,
+                "score": 0.39907562732696533,
+                "caption": "Meme poster feels overwhelmed and needs help solving simple and easy problems they can solve themselves.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 13,
+                "score": 0.39761173725128174,
+                "caption": "Poster is amused at Kitkat's tone deafness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 178,
+                "score": 0.39474722743034363,
+                "caption": "Meme poster thinks people who can't spell excited get embarrassed.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 158,
+                "score": 0.3944423794746399,
+                "caption": "Meme poster is trying to convey how Americans can become violent and destructive over sports.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 6,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_f0oq4v.png",
+        "title": "Americans when they wake up: *angry noises*",
+        "correct_caption": "The person who wrote the is comparing saying Americans don't believe in free healthcare",
+        "correct_rank": 283,
+        "top_retrieved": [
+            {
+                "candidate_index": 185,
+                "score": 0.455840528011322,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.4511466324329376,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.45108211040496826,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 44,
+                "score": 0.44933873414993286,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 246,
+                "score": 0.44649603962898254,
+                "caption": "Meme poster is conveying that every time you try to install something on your computer mcafee pops up to be annoying and makes it more difficult than it needs to be.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 7,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_fat6rn.png",
+        "title": "Ez Harvard admission",
+        "correct_caption": "Meme poster is mad that colleges will pay your way if you are an athlete, but not as much for academics.",
+        "correct_rank": 317,
+        "top_retrieved": [
+            {
+                "candidate_index": 138,
+                "score": 0.40252813696861267,
+                "caption": "Meme poster is trying to convey that their computer lie about their battery power so keep vigilant.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 546,
+                "score": 0.397504061460495,
+                "caption": "Meme poster feels overwhelmed and needs help solving simple and easy problems they can solve themselves.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 13,
+                "score": 0.3950372338294983,
+                "caption": "Poster is amused at Kitkat's tone deafness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 279,
+                "score": 0.3948430120944977,
+                "caption": "Meme poster thinks British people decide to build an empire after everyone else had their turn.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 0,
+                "score": 0.39313334226608276,
+                "caption": "Husband feels great after having their wife fall in love with him again after getting amnesia.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 8,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_fjiz2r.png",
+        "title": "You think you are sad",
+        "correct_caption": "Meme poster is making fun of the FBI for monitoring memes online.",
+        "correct_rank": 358,
+        "top_retrieved": [
+            {
+                "candidate_index": 114,
+                "score": 0.3987904191017151,
+                "caption": "Meme poster thinks the little girl doesn't separate reality from fiction.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 546,
+                "score": 0.3973962962627411,
+                "caption": "Meme poster feels overwhelmed and needs help solving simple and easy problems they can solve themselves.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 13,
+                "score": 0.39675572514533997,
+                "caption": "Poster is amused at Kitkat's tone deafness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 138,
+                "score": 0.39477676153182983,
+                "caption": "Meme poster is trying to convey that their computer lie about their battery power so keep vigilant.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 279,
+                "score": 0.3935043513774872,
+                "caption": "Meme poster thinks British people decide to build an empire after everyone else had their turn.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 9,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_fz7bbd.png",
+        "title": "Bow to me",
+        "correct_caption": "Meme poster felt they conquered water when they opened their eyes in the pool when they were 8.",
+        "correct_rank": 1,
+        "top_retrieved": [
+            {
+                "candidate_index": 9,
+                "score": 0.3911072313785553,
+                "caption": "Meme poster felt they conquered water when they opened their eyes in the pool when they were 8.",
+                "is_correct": true
+            },
+            {
+                "candidate_index": 62,
+                "score": 0.3894842863082886,
+                "caption": "Meme poster wishes pets lives as long as their owners.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 537,
+                "score": 0.38637852668762207,
+                "caption": "Meme poster gets stressed out when their man asks how much they spent shopping online.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 206,
+                "score": 0.3859110474586487,
+                "caption": "Meme poster gets excited when the see glitter.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 318,
+                "score": 0.38333407044410706,
+                "caption": "Meme poster knows their room is a mess when the ra visits.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 10,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_gxnnyn.png",
+        "title": "I do be like that",
+        "correct_caption": "Meme poster is mad that Netflix/tv shows/movies use adults who are in their 30's to play high school students.",
+        "correct_rank": 222,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.5677009224891663,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.5530235767364502,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.5371111035346985,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.5296341180801392,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 96,
+                "score": 0.5269360542297363,
+                "caption": "Europe can conquer countries, but cannot do math.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 11,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_gy6y78.png",
+        "title": "Take note pls",
+        "correct_caption": "Meme poster warns people of real life dangers of using a toilet in their dream.",
+        "correct_rank": 367,
+        "top_retrieved": [
+            {
+                "candidate_index": 107,
+                "score": 0.4240914285182953,
+                "caption": "Meme poster doesn't understand how Elon Musk is the way he is",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 434,
+                "score": 0.42377033829689026,
+                "caption": "The meme poster is disgusted by the activity and receives an apology from his mate.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 150,
+                "score": 0.4155411124229431,
+                "caption": "Meme poster is trying to convey that Elon Musk is trolling the checkmarks on Twitter.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 140,
+                "score": 0.4106181859970093,
+                "caption": "Meme poster thinks the government is bad at making websites.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 112,
+                "score": 0.4105040431022644,
+                "caption": "Poster believes focusing on blue checks is wasteful.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 12,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hamwzf.png",
+        "title": "One of the happiest moments in life",
+        "correct_caption": "The protester is happy to see the fbi agent after the riot.",
+        "correct_rank": 436,
+        "top_retrieved": [
+            {
+                "candidate_index": 245,
+                "score": 0.3886513411998749,
+                "caption": "Meme poster thinks artists augment their work by adding audio.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 21,
+                "score": 0.3882158696651459,
+                "caption": "Poster thinks Twitch is not worried about his participation.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 312,
+                "score": 0.38133305311203003,
+                "caption": "Meme poster is annoyed with being micromanaged at work.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 249,
+                "score": 0.380913108587265,
+                "caption": "Meme poster is trying to avoid video game leaks but can't avoid them.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 15,
+                "score": 0.379780650138855,
+                "caption": "Meme poster is trying to convey that their dog is always begging for food.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 13,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hg2c5y.png",
+        "title": "One tiny error",
+        "correct_caption": "Poster is amused at Kitkat's tone deafness.",
+        "correct_rank": 84,
+        "top_retrieved": [
+            {
+                "candidate_index": 62,
+                "score": 0.40312835574150085,
+                "caption": "Meme poster wishes pets lives as long as their owners.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 9,
+                "score": 0.38763850927352905,
+                "caption": "Meme poster felt they conquered water when they opened their eyes in the pool when they were 8.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 359,
+                "score": 0.38664644956588745,
+                "caption": "Meme poster took all the money out of their bank account at costco.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 222,
+                "score": 0.3814365863800049,
+                "caption": "Meme poster is conveying how horrible their childhood was.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 88,
+                "score": 0.38099363446235657,
+                "caption": "Meme poster is conveying they are not proud of their genes.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 14,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hmq8qx.png",
+        "title": "Based on a true story",
+        "correct_caption": "Meme poster lied to the magician during a show and both can't do anything.",
+        "correct_rank": 185,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.47603198885917664,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.46638399362564087,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.4604778289794922,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 246,
+                "score": 0.45993572473526,
+                "caption": "Meme poster is conveying that every time you try to install something on your computer mcafee pops up to be annoying and makes it more difficult than it needs to be.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.4591160714626312,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 15,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hmv62q.png",
+        "title": "I couldn't resist. Enjoy.",
+        "correct_caption": "Meme poster is trying to convey that their dog is always begging for food.",
+        "correct_rank": 226,
+        "top_retrieved": [
+            {
+                "candidate_index": 114,
+                "score": 0.3887750506401062,
+                "caption": "Meme poster thinks the little girl doesn't separate reality from fiction.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 13,
+                "score": 0.3864284157752991,
+                "caption": "Poster is amused at Kitkat's tone deafness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 546,
+                "score": 0.38512516021728516,
+                "caption": "Meme poster feels overwhelmed and needs help solving simple and easy problems they can solve themselves.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 208,
+                "score": 0.38506194949150085,
+                "caption": "The meme poster doesn't want to buy Girl Scout cookies.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 279,
+                "score": 0.3849200904369354,
+                "caption": "Meme poster thinks British people decide to build an empire after everyone else had their turn.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 16,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hv72fd.png",
+        "title": "Well done",
+        "correct_caption": "Poster argues with another person about his intelligence.",
+        "correct_rank": 519,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.45416679978370667,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.4541667699813843,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.44761595129966736,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.4471931457519531,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 246,
+                "score": 0.44717922806739807,
+                "caption": "Meme poster is conveying that every time you try to install something on your computer mcafee pops up to be annoying and makes it more difficult than it needs to be.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 17,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_hypmff.png",
+        "title": "I Love When They Think We Dont See Them",
+        "correct_caption": "Meme poster thinks its funny that lizards sit in easily visible places during the summer and act like they are surprised if a person notices them.",
+        "correct_rank": 181,
+        "top_retrieved": [
+            {
+                "candidate_index": 283,
+                "score": 0.38100573420524597,
+                "caption": "Meme poster lost power and is about to avenge.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 245,
+                "score": 0.38090673089027405,
+                "caption": "Meme poster thinks artists augment their work by adding audio.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 88,
+                "score": 0.37876930832862854,
+                "caption": "Meme poster is conveying they are not proud of their genes.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 318,
+                "score": 0.3784995973110199,
+                "caption": "Meme poster knows their room is a mess when the ra visits.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 21,
+                "score": 0.37805938720703125,
+                "caption": "Poster thinks Twitch is not worried about his participation.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 18,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_i5w6m3.png",
+        "title": "I am a bot and this was performed automatically.",
+        "correct_caption": "Meme poster will walk on curb because it is a automatic impulse even if it doesn't make sense to their mom.",
+        "correct_rank": 337,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.56640625,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.5529601573944092,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.5369120240211487,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.528998613357544,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 96,
+                "score": 0.5263235569000244,
+                "caption": "Europe can conquer countries, but cannot do math.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 19,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_i8tn53.png",
+        "title": "brain ads",
+        "correct_caption": "Elon Musk developing brain chips will result in the meme poster being kept awake by ads at 3 am.",
+        "correct_rank": 215,
+        "top_retrieved": [
+            {
+                "candidate_index": 185,
+                "score": 0.45638564229011536,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.45225247740745544,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.45184144377708435,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 44,
+                "score": 0.4508872926235199,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 246,
+                "score": 0.4470411539077759,
+                "caption": "Meme poster is conveying that every time you try to install something on your computer mcafee pops up to be annoying and makes it more difficult than it needs to be.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 20,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_it6820.png",
+        "title": "Oh look, Reddit",
+        "correct_caption": "Meme poster is trying to convey that they're addicted to Reddit.",
+        "correct_rank": 199,
+        "top_retrieved": [
+            {
+                "candidate_index": 62,
+                "score": 0.3977082073688507,
+                "caption": "Meme poster wishes pets lives as long as their owners.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 138,
+                "score": 0.3944815397262573,
+                "caption": "Meme poster is trying to convey that their computer lie about their battery power so keep vigilant.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 279,
+                "score": 0.3904030919075012,
+                "caption": "Meme poster thinks British people decide to build an empire after everyone else had their turn.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 109,
+                "score": 0.38975414633750916,
+                "caption": "Meme poster is trying to convey that their one nostril gets clogged up every time they try to sleep.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 103,
+                "score": 0.3871813416481018,
+                "caption": "Meme poster is conveying the annoyance at their parents turning their humor into discipline",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 21,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_iyv1uh.png",
+        "title": "It's annoying af",
+        "correct_caption": "Poster thinks Twitch is not worried about his participation.",
+        "correct_rank": 389,
+        "top_retrieved": [
+            {
+                "candidate_index": 138,
+                "score": 0.42593032121658325,
+                "caption": "Meme poster is trying to convey that their computer lie about their battery power so keep vigilant.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 543,
+                "score": 0.40936946868896484,
+                "caption": "Meme poster is conveying that women wonder why men don't understand their signals when they are overly complicated.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 546,
+                "score": 0.40678563714027405,
+                "caption": "Meme poster feels overwhelmed and needs help solving simple and easy problems they can solve themselves.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 92,
+                "score": 0.4057770371437073,
+                "caption": "Meme poster is trying to convey that it saddens them when Christmas season starts the day after Halloween.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 279,
+                "score": 0.40567538142204285,
+                "caption": "Meme poster thinks British people decide to build an empire after everyone else had their turn.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 22,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_j32ep7.png",
+        "title": "Doot Doot!",
+        "correct_caption": "Meme poster is trying to convey that once Halloween is coming back everyone will post skeleton memes",
+        "correct_rank": 201,
+        "top_retrieved": [
+            {
+                "candidate_index": 308,
+                "score": 0.4090404212474823,
+                "caption": "Meme poster does not see the difference between the two robots.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 190,
+                "score": 0.4076129198074341,
+                "caption": "The meme poster sees the new meme format everywhere they go.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 235,
+                "score": 0.40627577900886536,
+                "caption": "The meme poster feels disgusting while the meme poster saw that the kids are advising their juniors.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 75,
+                "score": 0.4061639904975891,
+                "caption": "The poster is not interested in the Elon's twitter drama.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 247,
+                "score": 0.40467265248298645,
+                "caption": "The meme poster describes that, though he have lot of words in his mind, he uses very few of his talent while writing an essay.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 23,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_j3qvhf.png",
+        "title": "Real SOMA ULTE",
+        "correct_caption": "Poster thinks that the satisfaction of finding someone with a matching shirt is more than planning to have matching shirts.",
+        "correct_rank": 466,
+        "top_retrieved": [
+            {
+                "candidate_index": 308,
+                "score": 0.42150554060935974,
+                "caption": "Meme poster does not see the difference between the two robots.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 75,
+                "score": 0.41926729679107666,
+                "caption": "The poster is not interested in the Elon's twitter drama.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 190,
+                "score": 0.4143618941307068,
+                "caption": "The meme poster sees the new meme format everywhere they go.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 247,
+                "score": 0.41300147771835327,
+                "caption": "The meme poster describes that, though he have lot of words in his mind, he uses very few of his talent while writing an essay.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 235,
+                "score": 0.4097770154476166,
+                "caption": "The meme poster feels disgusting while the meme poster saw that the kids are advising their juniors.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 24,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_jht4yd.png",
+        "title": "Everybody's dumb but me",
+        "correct_caption": "The teacher thinks a student is smart because they know a random element, but the meme poster feels smarter because he watched Avatar and knows the real elements.",
+        "correct_rank": 382,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.5745857954025269,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.5607145428657532,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.5431131720542908,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.5335066914558411,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 96,
+                "score": 0.5322055816650391,
+                "caption": "Europe can conquer countries, but cannot do math.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 25,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_jwzd2u.png",
+        "title": "false advertisement",
+        "correct_caption": "Meme poster didn't realize they could get diabetes from drinking so much red bull.",
+        "correct_rank": 333,
+        "top_retrieved": [
+            {
+                "candidate_index": 185,
+                "score": 0.44663774967193604,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 44,
+                "score": 0.4414554536342621,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.43985265493392944,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 246,
+                "score": 0.4396735429763794,
+                "caption": "Meme poster is conveying that every time you try to install something on your computer mcafee pops up to be annoying and makes it more difficult than it needs to be.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.43831294775009155,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 26,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_k4xv8c.png",
+        "title": "I deserve it",
+        "correct_caption": "Meme poster feels like they deserve relaxation after coming up with a title for their writing assignment.",
+        "correct_rank": 370,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.5833181738853455,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.5647223591804504,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.5444048643112183,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 96,
+                "score": 0.5347014665603638,
+                "caption": "Europe can conquer countries, but cannot do math.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.5337962508201599,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 27,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_k83rjb.png",
+        "title": "I do it every time",
+        "correct_caption": "Meme poster is trying to convey that they watch movies differently than other people.",
+        "correct_rank": 321,
+        "top_retrieved": [
+            {
+                "candidate_index": 138,
+                "score": 0.3977788984775543,
+                "caption": "Meme poster is trying to convey that their computer lie about their battery power so keep vigilant.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 279,
+                "score": 0.3941800892353058,
+                "caption": "Meme poster thinks British people decide to build an empire after everyone else had their turn.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 13,
+                "score": 0.39390167593955994,
+                "caption": "Poster is amused at Kitkat's tone deafness.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 103,
+                "score": 0.3919973075389862,
+                "caption": "Meme poster is conveying the annoyance at their parents turning their humor into discipline",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 109,
+                "score": 0.3911101818084717,
+                "caption": "Meme poster is trying to convey that their one nostril gets clogged up every time they try to sleep.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 28,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_kds715.png",
+        "title": "The Return of the [paper] King",
+        "correct_caption": "People, especially men and kids, use empty wrapping paper tubes as swords, so anyone that has one, will use it that way and be so excited about it.",
+        "correct_rank": 379,
+        "top_retrieved": [
+            {
+                "candidate_index": 235,
+                "score": 0.3980731666088104,
+                "caption": "The meme poster feels disgusting while the meme poster saw that the kids are advising their juniors.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 190,
+                "score": 0.3960958421230316,
+                "caption": "The meme poster sees the new meme format everywhere they go.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 338,
+                "score": 0.39584454894065857,
+                "caption": "Meme poster is surprised there are two good songs about Russia.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 188,
+                "score": 0.39571109414100647,
+                "caption": "Meme poster knows all the stereotypes about Italians are true in the memes.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 191,
+                "score": 0.3953302800655365,
+                "caption": "Meme poster is trying to convey that they feel old when they see the video game in the picture.",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "query_index": 29,
+        "image_path": "/home/kubra/Cmpe597/data/memes/memes_kq9d2b.png",
+        "title": "Looking good bro",
+        "correct_caption": "Meme poster is trying to convey the differences between how men and women use filters on Snapchat.",
+        "correct_rank": 9,
+        "top_retrieved": [
+            {
+                "candidate_index": 44,
+                "score": 0.575783908367157,
+                "caption": "British men look so young until they hit 25 and age rapidly.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 67,
+                "score": 0.5609815716743469,
+                "caption": "Poster thinks women stress over men's thoughts too much.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 189,
+                "score": 0.5431549549102783,
+                "caption": "Meme poster is trying to convey society doesn't believe men have feelings but they do.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 185,
+                "score": 0.5334892868995667,
+                "caption": "Meme poster is happy to get a c despite what everyone may think.",
+                "is_correct": false
+            },
+            {
+                "candidate_index": 96,
+                "score": 0.5324013829231262,
+                "caption": "Europe can conquer countries, but cannot do math.",
+                "is_correct": false
+            }
+        ]
+    }
+]

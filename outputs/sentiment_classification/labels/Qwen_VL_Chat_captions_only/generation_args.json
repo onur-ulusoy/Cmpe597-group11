@@ -1,0 +1,15 @@
+{
+    "train_input": "data/memes-trainval.json",
+    "test_input": "data/memes-test.json",
+    "image_root": "data/memes",
+    "output_dir": "outputs/sentiment_classification/labels",
+    "model_name": "Qwen/Qwen-VL-Chat",
+    "split": "both",
+    "text_source": "meme_caption",
+    "manual_per_class": 10,
+    "seed": 42,
+    "dtype": "bfloat16",
+    "device_map_auto": false,
+    "retry_invalid": true,
+    "max_new_tokens": 8
+}

@@ -1,241 +1,665 @@
+#!/usr/bin/env python3
+import argparse
 import json
 import os
+import random
+from pathlib import Path
+from collections import Counter
+
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
-from transformers import CLIPProcessor, CLIPModel
-from sklearn.metrics import accuracy_score, f1_score
 from PIL import Image
 from tqdm import tqdm
-import argparse
+from torch.utils.data import DataLoader, TensorDataset, random_split
 
-# Define the 7 emotion classes mapping
-EMOTION_TO_ID = {
-    "Anger": 0, "Disgust": 1, "Fear": 2, "Joy": 3, 
-    "Neutral": 4, "Sadness": 5, "Surprise": 6
+from transformers import CLIPProcessor, CLIPModel
+
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    classification_report,
+    confusion_matrix,
+)
+
+
+EMOTION_7_TO_ID = {
+    "Anger": 0,
+    "Disgust": 1,
+    "Fear": 2,
+    "Joy": 3,
+    "Neutral": 4,
+    "Sadness": 5,
+    "Surprise": 6,
 }
-ID_TO_EMOTION = {v: k for k, v in EMOTION_TO_ID.items()}
-NUM_CLASSES = len(EMOTION_TO_ID)
+
+EMOTION_3_TO_ID = {
+    "Negative": 0,
+    "Neutral": 1,
+    "Positive": 2,
+}
+
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def extract_clip_features(data, image_root, model, processor, device):
+
+def save_json(data, path):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+
+def get_label_maps(label_set):
+    if label_set == "7class":
+        label_to_id = EMOTION_7_TO_ID
+    elif label_set == "3class":
+        label_to_id = EMOTION_3_TO_ID
+    else:
+        raise ValueError(f"Unknown label_set: {label_set}")
+
+    id_to_label = {v: k for k, v in label_to_id.items()}
+    return label_to_id, id_to_label
+
+
+def get_meme_caption(item):
+    meme_caps = item.get("meme_captions", [])
+
+    if (
+        isinstance(meme_caps, list)
+        and len(meme_caps) > 0
+        and isinstance(meme_caps[0], str)
+        and meme_caps[0].strip()
+    ):
+        return meme_caps[0].strip()
+
+    title = item.get("title", "")
+    if isinstance(title, str) and title.strip():
+        return title.strip()
+
+    return ""
+
+
+def extract_clip_features(
+    data,
+    image_root,
+    model,
+    processor,
+    device,
+    label_key,
+    label_to_id,
+    batch_size=64,
+):
     """
-    Passes all images and texts through frozen CLIP once before training.
-    This saves massive amounts of time during the MLP training loop.
+    Extract frozen CLIP image and text features.
+
+    Important:
+    - Invalid labels are skipped.
+    - Missing images/text are skipped.
+    - Labels are not defaulted to Neutral.
     """
+    valid_items = []
+    skipped_bad_label = 0
+    skipped_missing_text = 0
+    skipped_missing_image = 0
+    skipped_image_error = 0
+
+    for item in data:
+        label_str = item.get(label_key, None)
+
+        if label_str not in label_to_id:
+            skipped_bad_label += 1
+            continue
+
+        text = get_meme_caption(item)
+        if not text:
+            skipped_missing_text += 1
+            continue
+
+        img_fname = item.get("img_fname", "")
+        img_path = os.path.join(image_root, img_fname)
+
+        if not img_fname or not os.path.exists(img_path):
+            skipped_missing_image += 1
+            continue
+
+        valid_items.append((item, text, img_path, label_to_id[label_str]))
+
+    print(f"Valid samples for CLIP extraction: {len(valid_items)}")
+    print(f"Skipped bad/missing labels: {skipped_bad_label}")
+    print(f"Skipped missing text: {skipped_missing_text}")
+    print(f"Skipped missing image path: {skipped_missing_image}")
+
     image_features_list = []
     text_features_list = []
     labels_list = []
 
     model.eval()
-    with torch.no_grad():
-        for item in tqdm(data, desc="Extracting CLIP Features"):
-            # Extract Label
-            label_str = item.get("vlm_sentiment_label", "Neutral")
-            label_id = EMOTION_TO_ID.get(label_str, 4) # Default to Neutral if weird
 
-            # Extract Text
-            meme_caps = item.get("meme_captions", [])
-            text = meme_caps[0] if isinstance(meme_caps, list) and len(meme_caps) > 0 else item.get("title", "")
-            if not text:
-                continue
+    for start in tqdm(range(0, len(valid_items), batch_size), desc="Extracting CLIP features"):
+        batch = valid_items[start:start + batch_size]
 
-            # Extract Image
-            img_fname = item.get("img_fname", "")
-            img_path = os.path.join(image_root, img_fname)
-            if not os.path.exists(img_path):
-                continue
-            
+        texts = []
+        images = []
+        labels = []
+
+        for _, text, img_path, label_id in batch:
             try:
-                raw_image = Image.open(img_path).convert('RGB')
+                image = Image.open(img_path).convert("RGB")
             except Exception:
+                skipped_image_error += 1
                 continue
 
-            # Process through CLIP
-            inputs = processor(text=[text], images=raw_image, return_tensors="pt", padding=True, truncation=True, max_length=77).to(device)            
-            img_embeds = model.get_image_features(pixel_values=inputs.pixel_values)
-            txt_embeds = model.get_text_features(input_ids=inputs.input_ids, attention_mask=inputs.attention_mask)
+            texts.append(text)
+            images.append(image)
+            labels.append(label_id)
 
-            # Normalize embeddings (standard practice for CLIP)
+        if not texts:
+            continue
+
+        with torch.no_grad():
+            inputs = processor(
+                text=texts,
+                images=images,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=77,
+            ).to(device)
+
+            img_embeds = model.get_image_features(pixel_values=inputs.pixel_values)
+            txt_embeds = model.get_text_features(
+                input_ids=inputs.input_ids,
+                attention_mask=inputs.attention_mask,
+            )
+
             img_embeds = img_embeds / img_embeds.norm(p=2, dim=-1, keepdim=True)
             txt_embeds = txt_embeds / txt_embeds.norm(p=2, dim=-1, keepdim=True)
 
-            image_features_list.append(img_embeds.cpu())
-            text_features_list.append(txt_embeds.cpu())
-            labels_list.append(torch.tensor([label_id]))
+        image_features_list.append(img_embeds.cpu())
+        text_features_list.append(txt_embeds.cpu())
+        labels_list.append(torch.tensor(labels, dtype=torch.long))
 
-    # Stack all tensors
-    return (
-        torch.cat(image_features_list, dim=0),
-        torch.cat(text_features_list, dim=0),
-        torch.cat(labels_list, dim=0)
-    )
+    print(f"Skipped image loading errors: {skipped_image_error}")
+
+    if not image_features_list:
+        raise RuntimeError("No valid samples were extracted. Check image paths and label_key.")
+
+    image_features = torch.cat(image_features_list, dim=0)
+    text_features = torch.cat(text_features_list, dim=0)
+    labels = torch.cat(labels_list, dim=0)
+
+    print(f"Final extracted feature shape: image={tuple(image_features.shape)}, text={tuple(text_features.shape)}")
+    print(f"Label distribution: {Counter(labels.tolist())}")
+
+    return image_features, text_features, labels
+
 
 class UnimodalMLP(nn.Module):
-    """
-    A simple but robust MLP for Unimodal Classification (Image-Only or Text-Only).
-    Using LayerNorm and GELU based on best practices from Task 2.2.
-    """
-    def __init__(self, input_dim=768, hidden_dim=256, num_classes=7, dropout=0.3):
-        super(UnimodalMLP, self).__init__()
+    def __init__(self, input_dim, hidden_dim=256, num_classes=7, dropout=0.3):
+        super().__init__()
+
         self.network = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
             nn.GELU(),
             nn.Dropout(dropout),
+
             nn.Linear(hidden_dim, hidden_dim // 2),
             nn.LayerNorm(hidden_dim // 2),
             nn.GELU(),
             nn.Dropout(dropout),
-            nn.Linear(hidden_dim // 2, num_classes)
+
+            nn.Linear(hidden_dim // 2, num_classes),
         )
 
     def forward(self, x):
         return self.network(x)
 
-def train_and_evaluate(model, train_loader, test_loader, device, epochs=15, lr=1e-3, model_name="Unimodal Model"):
-    """
-    Standard training loop for PyTorch with Macro F1-Score evaluation.
-    """
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
-    
-    best_f1 = 0.0
-    best_acc = 0.0
-    
-    print(f"\n{'='*40}")
-    print(f"Training {model_name}")
-    print(f"{'='*40}")
 
-    for epoch in range(epochs):
+def compute_class_weights(labels, num_classes, device):
+    counts = torch.bincount(labels, minlength=num_classes).float()
+
+    # Avoid division by zero.
+    counts = torch.clamp(counts, min=1.0)
+
+    total = counts.sum()
+    weights = total / (num_classes * counts)
+
+    return weights.to(device)
+
+
+def evaluate(model, loader, device, id_to_label):
+    model.eval()
+
+    all_preds = []
+    all_labels = []
+
+    with torch.no_grad():
+        for features, labels in loader:
+            features = features.to(device)
+            outputs = model(features)
+            preds = torch.argmax(outputs, dim=1).cpu().numpy()
+
+            all_preds.extend(preds.tolist())
+            all_labels.extend(labels.numpy().tolist())
+
+    acc = accuracy_score(all_labels, all_preds)
+    macro_f1 = f1_score(all_labels, all_preds, average="macro", zero_division=0)
+    weighted_f1 = f1_score(all_labels, all_preds, average="weighted", zero_division=0)
+
+    target_names = [id_to_label[i] for i in range(len(id_to_label))]
+
+    report = classification_report(
+        all_labels,
+        all_preds,
+        labels=list(range(len(id_to_label))),
+        target_names=target_names,
+        output_dict=True,
+        zero_division=0,
+    )
+
+    cm = confusion_matrix(
+        all_labels,
+        all_preds,
+        labels=list(range(len(id_to_label))),
+    )
+
+    return {
+        "accuracy": acc,
+        "macro_f1": macro_f1,
+        "weighted_f1": weighted_f1,
+        "classification_report": report,
+        "confusion_matrix": cm.tolist(),
+        "predictions": all_preds,
+        "labels": all_labels,
+    }
+
+
+def train_model(
+    model,
+    train_loader,
+    val_loader,
+    test_loader,
+    train_labels,
+    device,
+    id_to_label,
+    epochs=20,
+    lr=1e-3,
+    weight_decay=1e-4,
+    model_name="Unimodal Model",
+):
+    num_classes = len(id_to_label)
+    class_weights = compute_class_weights(train_labels, num_classes, device)
+
+    print(f"\nClass weights for {model_name}:")
+    for i, w in enumerate(class_weights.detach().cpu().tolist()):
+        print(f"  {id_to_label[i]}: {w:.4f}")
+
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+
+    best_val_f1 = -1.0
+    best_state = None
+    best_epoch = 0
+
+    print(f"\n{'=' * 60}")
+    print(f"Training {model_name}")
+    print(f"{'=' * 60}")
+
+    for epoch in range(1, epochs + 1):
         model.train()
-        total_loss = 0
-        
+        total_loss = 0.0
+
         for features, labels in train_loader:
-            features, labels = features.to(device), labels.to(device)
-            
+            features = features.to(device)
+            labels = labels.to(device)
+
             optimizer.zero_grad()
             outputs = model(features)
             loss = criterion(outputs, labels)
-            
             loss.backward()
             optimizer.step()
-            
-            total_loss += loss.item()
-            
-        avg_train_loss = total_loss / len(train_loader)
-        
-        # Evaluation Phase
-        model.eval()
-        all_preds = []
-        all_labels = []
-        
-        with torch.no_grad():
-            for features, labels in test_loader:
-                features = features.to(device)
-                outputs = model(features)
-                preds = torch.argmax(outputs, dim=1).cpu().numpy()
-                
-                all_preds.extend(preds)
-                all_labels.extend(labels.numpy())
-                
-        acc = accuracy_score(all_labels, all_preds)
-        macro_f1 = f1_score(all_labels, all_preds, average="macro")
-        
-        # Save best metrics
-        if macro_f1 > best_f1:
-            best_f1 = macro_f1
-            best_acc = acc
-            
-        print(f"Epoch {epoch+1:02d}/{epochs} | Loss: {avg_train_loss:.4f} | Test Acc: {acc:.4f} | Test Macro F1: {macro_f1:.4f}")
 
-    print(f"\n>>> BEST RESULTS FOR {model_name.upper()} <<<")
-    print(f"Accuracy: {best_acc:.4f}")
-    print(f"Macro F1: {best_f1:.4f}\n")
-    
-    return best_acc, best_f1
+            total_loss += loss.item()
+
+        avg_loss = total_loss / max(len(train_loader), 1)
+
+        val_metrics = evaluate(model, val_loader, device, id_to_label)
+
+        if val_metrics["macro_f1"] > best_val_f1:
+            best_val_f1 = val_metrics["macro_f1"]
+            best_epoch = epoch
+            best_state = {
+                k: v.detach().cpu().clone()
+                for k, v in model.state_dict().items()
+            }
+
+        print(
+            f"Epoch {epoch:02d}/{epochs} | "
+            f"Loss: {avg_loss:.4f} | "
+            f"Val Acc: {val_metrics['accuracy']:.4f} | "
+            f"Val Macro F1: {val_metrics['macro_f1']:.4f} | "
+            f"Val Weighted F1: {val_metrics['weighted_f1']:.4f}"
+        )
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
+
+    test_metrics = evaluate(model, test_loader, device, id_to_label)
+
+    print(f"\n>>> BEST VALIDATION EPOCH FOR {model_name}: {best_epoch}")
+    print(f">>> FINAL TEST RESULTS FOR {model_name}")
+    print(f"Accuracy:    {test_metrics['accuracy']:.4f}")
+    print(f"Macro F1:    {test_metrics['macro_f1']:.4f}")
+    print(f"Weighted F1: {test_metrics['weighted_f1']:.4f}")
+
+    return test_metrics, best_epoch
+
+
+def make_train_val_loaders(features, labels, batch_size, val_ratio, seed):
+    dataset = TensorDataset(features, labels)
+
+    val_size = int(len(dataset) * val_ratio)
+    train_size = len(dataset) - val_size
+
+    generator = torch.Generator().manual_seed(seed)
+    train_dataset, val_dataset = random_split(
+        dataset,
+        [train_size, val_size],
+        generator=generator,
+    )
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+    train_indices = train_dataset.indices
+    train_labels_for_weights = labels[train_indices]
+
+    return train_loader, val_loader, train_labels_for_weights
+
+
+def save_text_report(result_path, image_metrics, text_metrics):
+    result_text = (
+        f"\n{'=' * 60}\n"
+        f"TASK 2.3.b: UNIMODAL BASELINES FINAL COMPARISON\n"
+        f"{'=' * 60}\n"
+        f"{'Modality':<20} | {'Accuracy':<10} | {'Macro F1':<10} | {'Weighted F1':<10}\n"
+        f"{'-' * 60}\n"
+        f"{'Image-Only MLP':<20} | {image_metrics['accuracy']:<10.4f} | "
+        f"{image_metrics['macro_f1']:<10.4f} | {image_metrics['weighted_f1']:<10.4f}\n"
+        f"{'Text-Only MLP':<20} | {text_metrics['accuracy']:<10.4f} | "
+        f"{text_metrics['macro_f1']:<10.4f} | {text_metrics['weighted_f1']:<10.4f}\n"
+        f"{'=' * 60}\n"
+    )
+
+    print(result_text)
+
+    with open(result_path, "w", encoding="utf-8") as f:
+        f.write(result_text)
+
 
 def main(args):
+    set_seed(args.seed)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # 1. Load the "Gold Standard" Qwen JSON files
+    label_to_id, id_to_label = get_label_maps(args.label_set)
+    num_classes = len(label_to_id)
+
+    out_dir = Path(args.output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    save_json(vars(args), out_dir / "train_unimodal_args.json")
+
+    print("\nLoading label JSON files...")
     train_data = load_json(args.train_labels)
     test_data = load_json(args.test_labels)
 
-    # 2. Load Frozen CLIP for Feature Extraction
-    print("\nLoading OpenCLIP (ViT-L/14) to extract features...")
-    clip_model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14").to(device)
-    clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14")
+    print(f"Train JSON samples: {len(train_data)}")
+    print(f"Test JSON samples: {len(test_data)}")
+    print(f"Using label_key: {args.label_key}")
+    print(f"Using label_set: {args.label_set}")
 
-    # 3. Extract Features (This happens once and saves to RAM)
-    print("\nExtracting Train Set Features...")
-    train_img_feat, train_txt_feat, train_labels = extract_clip_features(train_data, args.image_root, clip_model, clip_processor, device)
-    
-    print("\nExtracting Test Set Features...")
-    test_img_feat, test_txt_feat, test_labels = extract_clip_features(test_data, args.image_root, clip_model, clip_processor, device)
+    cache_path = out_dir / f"clip_feature_cache_{args.label_set}_{args.cache_name}.pt"
 
-    # Free up GPU memory since we don't need CLIP anymore
-    del clip_model
-    torch.cuda.empty_cache()
+    if args.use_cache and cache_path.exists():
+        print(f"\nLoading cached CLIP features from: {cache_path}")
+        cache = torch.load(cache_path, map_location="cpu")
 
-    # 4. Create PyTorch DataLoaders
-    batch_size = 64
-    
-    # Image Datasets
-    train_img_dataset = TensorDataset(train_img_feat, train_labels)
-    test_img_dataset = TensorDataset(test_img_feat, test_labels)
-    
-    train_img_loader = DataLoader(train_img_dataset, batch_size=batch_size, shuffle=True)
-    test_img_loader = DataLoader(test_img_dataset, batch_size=batch_size, shuffle=False)
+        train_img_feat = cache["train_img_feat"]
+        train_txt_feat = cache["train_txt_feat"]
+        train_labels = cache["train_labels"]
+        test_img_feat = cache["test_img_feat"]
+        test_txt_feat = cache["test_txt_feat"]
+        test_labels = cache["test_labels"]
 
-    # Text Datasets
-    train_txt_dataset = TensorDataset(train_txt_feat, train_labels)
-    test_txt_dataset = TensorDataset(test_txt_feat, test_labels)
-    
-    train_txt_loader = DataLoader(train_txt_dataset, batch_size=batch_size, shuffle=True)
-    test_txt_loader = DataLoader(test_txt_dataset, batch_size=batch_size, shuffle=False)
+    else:
+        print(f"\nLoading CLIP model: {args.clip_model}")
+        clip_model = CLIPModel.from_pretrained(args.clip_model).to(device)
+        clip_processor = CLIPProcessor.from_pretrained(args.clip_model)
 
-    # 5. Train Image-Only Baseline
-    img_model = UnimodalMLP(input_dim=768, num_classes=NUM_CLASSES).to(device)
-    img_acc, img_f1 = train_and_evaluate(img_model, train_img_loader, test_img_loader, device, epochs=15, model_name="Image-Only Baseline")
+        print("\nExtracting train CLIP features...")
+        train_img_feat, train_txt_feat, train_labels = extract_clip_features(
+            data=train_data,
+            image_root=args.image_root,
+            model=clip_model,
+            processor=clip_processor,
+            device=device,
+            label_key=args.label_key,
+            label_to_id=label_to_id,
+            batch_size=args.feature_batch_size,
+        )
 
-    # 6. Train Text-Only Baseline
-    txt_model = UnimodalMLP(input_dim=768, num_classes=NUM_CLASSES).to(device)
-    txt_acc, txt_f1 = train_and_evaluate(txt_model, train_txt_loader, test_txt_loader, device, epochs=15, model_name="Text-Only Baseline")
+        print("\nExtracting test CLIP features...")
+        test_img_feat, test_txt_feat, test_labels = extract_clip_features(
+            data=test_data,
+            image_root=args.image_root,
+            model=clip_model,
+            processor=clip_processor,
+            device=device,
+            label_key=args.label_key,
+            label_to_id=label_to_id,
+            batch_size=args.feature_batch_size,
+        )
 
-    # 7. Print and Save Final Comparison Table
-    result_text = (
-        f"\n{'='*50}\n"
-        f"TASK 2.3.b: UNIMODAL BASELINES FINAL COMPARISON\n"
-        f"{'='*50}\n"
-        f"{'Modality':<20} | {'Accuracy':<12} | {'Macro F1':<12}\n"
-        f"-" * 50 + "\n"
-        f"{'Image-Only MLP':<20} | {img_acc:.4f}{'':<6} | {img_f1:.4f}\n"
-        f"{'Text-Only MLP':<20} | {txt_acc:.4f}{'':<6} | {txt_f1:.4f}\n"
-        f"{'='*50}\n"
+        del clip_model
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        if args.use_cache:
+            print(f"\nSaving CLIP feature cache to: {cache_path}")
+            torch.save(
+                {
+                    "train_img_feat": train_img_feat,
+                    "train_txt_feat": train_txt_feat,
+                    "train_labels": train_labels,
+                    "test_img_feat": test_img_feat,
+                    "test_txt_feat": test_txt_feat,
+                    "test_labels": test_labels,
+                },
+                cache_path,
+            )
+
+    input_dim = train_img_feat.shape[1]
+    print(f"\nCLIP feature dimension: {input_dim}")
+
+    test_img_loader = DataLoader(
+        TensorDataset(test_img_feat, test_labels),
+        batch_size=args.batch_size,
+        shuffle=False,
     )
-    
-    print(result_text)
-    
-    # Save the table to the outputs folder
-    out_dir = "outputs/sentiment_classification"
-    os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, "unimodal_results.txt")
-    
-    with open(out_file, "w", encoding="utf-8") as f:
-        f.write(result_text)
-        
-    print(f"Results successfully saved to {out_file}")
+
+    test_txt_loader = DataLoader(
+        TensorDataset(test_txt_feat, test_labels),
+        batch_size=args.batch_size,
+        shuffle=False,
+    )
+
+    train_img_loader, val_img_loader, train_img_labels_for_weights = make_train_val_loaders(
+        train_img_feat,
+        train_labels,
+        batch_size=args.batch_size,
+        val_ratio=args.val_ratio,
+        seed=args.seed,
+    )
+
+    train_txt_loader, val_txt_loader, train_txt_labels_for_weights = make_train_val_loaders(
+        train_txt_feat,
+        train_labels,
+        batch_size=args.batch_size,
+        val_ratio=args.val_ratio,
+        seed=args.seed,
+    )
+
+    img_model = UnimodalMLP(
+        input_dim=input_dim,
+        hidden_dim=args.hidden_dim,
+        num_classes=num_classes,
+        dropout=args.dropout,
+    ).to(device)
+
+    image_metrics, image_best_epoch = train_model(
+        model=img_model,
+        train_loader=train_img_loader,
+        val_loader=val_img_loader,
+        test_loader=test_img_loader,
+        train_labels=train_img_labels_for_weights,
+        device=device,
+        id_to_label=id_to_label,
+        epochs=args.epochs,
+        lr=args.lr,
+        weight_decay=args.weight_decay,
+        model_name="Image-Only MLP",
+    )
+
+    txt_model = UnimodalMLP(
+        input_dim=input_dim,
+        hidden_dim=args.hidden_dim,
+        num_classes=num_classes,
+        dropout=args.dropout,
+    ).to(device)
+
+    text_metrics, text_best_epoch = train_model(
+        model=txt_model,
+        train_loader=train_txt_loader,
+        val_loader=val_txt_loader,
+        test_loader=test_txt_loader,
+        train_labels=train_txt_labels_for_weights,
+        device=device,
+        id_to_label=id_to_label,
+        epochs=args.epochs,
+        lr=args.lr,
+        weight_decay=args.weight_decay,
+        model_name="Text-Only MLP",
+    )
+
+    final_results = {
+        "label_set": args.label_set,
+        "label_key": args.label_key,
+        "clip_model": args.clip_model,
+        "image_only": {
+            "best_epoch_by_val_macro_f1": image_best_epoch,
+            "test_metrics": {
+                k: v for k, v in image_metrics.items()
+                if k not in ["predictions", "labels"]
+            },
+        },
+        "text_only": {
+            "best_epoch_by_val_macro_f1": text_best_epoch,
+            "test_metrics": {
+                k: v for k, v in text_metrics.items()
+                if k not in ["predictions", "labels"]
+            },
+        },
+    }
+
+    save_json(final_results, out_dir / "unimodal_results.json")
+    save_text_report(out_dir / "unimodal_results.txt", image_metrics, text_metrics)
+
+    torch.save(img_model.state_dict(), out_dir / "image_only_mlp.pt")
+    torch.save(txt_model.state_dict(), out_dir / "text_only_mlp.pt")
+
+    print(f"\nSaved all outputs to: {out_dir}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # Ensure these paths point to your newly generated Qwen labels
-    parser.add_argument("--train_labels", type=str, default="outputs/sentiment_classification/labels/Qwen_VL_Chat/train_qwen_labels.json")
-    parser.add_argument("--test_labels", type=str, default="outputs/sentiment_classification/labels/Qwen_VL_Chat/test_qwen_labels.json")
-    parser.add_argument("--image_root", type=str, default="data/memes")
+
+    parser.add_argument(
+        "--train_labels",
+        type=str,
+        required=True,
+        help="Path to train JSON with Qwen labels.",
+    )
+    parser.add_argument(
+        "--test_labels",
+        type=str,
+        required=True,
+        help="Path to test JSON with Qwen labels.",
+    )
+    parser.add_argument(
+        "--image_root",
+        type=str,
+        default="data/memes",
+        help="Directory containing meme images.",
+    )
+    parser.add_argument(
+        "--label_key",
+        type=str,
+        required=True,
+        help="JSON key containing the sentiment label.",
+    )
+    parser.add_argument(
+        "--label_set",
+        type=str,
+        choices=["7class", "3class"],
+        default="7class",
+        help="Use 7-class emotion labels or 3-class polarity labels.",
+    )
+    parser.add_argument(
+        "--clip_model",
+        type=str,
+        default="openai/clip-vit-large-patch14",
+        help="HuggingFace CLIP model.",
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="outputs/sentiment_classification/unimodal_baselines",
+        help="Directory to save results.",
+    )
+    parser.add_argument(
+        "--cache_name",
+        type=str,
+        default="default",
+        help="Name suffix for cached CLIP features.",
+    )
+    parser.add_argument(
+        "--use_cache",
+        action="store_true",
+        help="Save/load cached CLIP features.",
+    )
+
+    parser.add_argument("--epochs", type=int, default=20)
+    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--feature_batch_size", type=int, default=64)
+    parser.add_argument("--hidden_dim", type=int, default=256)
+    parser.add_argument("--dropout", type=float, default=0.3)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--weight_decay", type=float, default=1e-4)
+    parser.add_argument("--val_ratio", type=float, default=0.15)
+    parser.add_argument("--seed", type=int, default=42)
+
     args = parser.parse_args()
     main(args)

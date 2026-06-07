@@ -1,190 +1,681 @@
+#!/usr/bin/env python3
 import json
 import os
 import argparse
 import random
-from collections import Counter
-from tqdm import tqdm
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from pathlib import Path
+import re
 import shutil
+from collections import Counter, defaultdict
+from pathlib import Path
+
+import torch
+from tqdm import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+
+VALID_CLASSES = [
+    "Anger",
+    "Disgust",
+    "Fear",
+    "Joy",
+    "Neutral",
+    "Sadness",
+    "Surprise",
+]
+
+AUX_CLASSES = [
+    "INVALID",
+    "AMBIGUOUS",
+]
+
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 def save_json(data, path):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-def clean_vlm_output(text, valid_classes):
-    """
-    Cleans the raw VLM text generation to extract exactly one of the valid classes.
-    """
-    text = text.lower().strip()
-    for valid_class in valid_classes:
-        if valid_class.lower() in text:
-            return valid_class
-    return "Neutral"
 
-def save_markdown_report(samples, image_root, output_path):
-    out_dir = os.path.dirname(output_path)
-    os.makedirs(out_dir, exist_ok=True)
-    
-    sample_img_dir = os.path.join(out_dir, "sampled_images")
-    os.makedirs(sample_img_dir, exist_ok=True)
-    
+def get_meme_caption(item):
+    """
+    Use meme_captions[0], as required by the project.
+    Fall back to title only if meme_captions is missing or empty.
+    """
+    meme_caps = item.get("meme_captions", [])
+
+    if (
+        isinstance(meme_caps, list)
+        and len(meme_caps) > 0
+        and isinstance(meme_caps[0], str)
+        and meme_caps[0].strip()
+    ):
+        return meme_caps[0].strip()
+
+    title = item.get("title", "")
+    if isinstance(title, str) and title.strip():
+        return title.strip()
+
+    return ""
+
+
+def clean_vlm_output(text, valid_classes=VALID_CLASSES):
+    """
+    Robustly extract exactly one valid class.
+
+    Returns:
+        one of VALID_CLASSES
+        "AMBIGUOUS"
+        "INVALID"
+
+    This avoids the dangerous behavior of returning Joy from:
+        "not Joy, probably Sadness"
+    """
+    if not isinstance(text, str) or not text.strip():
+        return "INVALID"
+
+    text = text.strip()
+
+    # Remove common prefixes.
+    text = re.sub(r"^\s*(emotion|label|answer)\s*:\s*", "", text, flags=re.IGNORECASE)
+    lowered = text.lower().strip()
+
+    # Check explicit ambiguous output.
+    if re.search(r"\bambiguous\b", lowered):
+        return "AMBIGUOUS"
+
+    # Exact label after removing non-letters.
+    cleaned_alpha = re.sub(r"[^a-zA-Z]", "", lowered)
+
+    for label in valid_classes:
+        if cleaned_alpha == label.lower():
+            return label
+
+    if cleaned_alpha == "ambiguous":
+        return "AMBIGUOUS"
+
+    # If exactly one class name appears as a full word, accept it.
+    matches = []
+    for label in valid_classes:
+        pattern = rf"\b{re.escape(label.lower())}\b"
+        if re.search(pattern, lowered):
+            matches.append(label)
+
+    unique_matches = list(dict.fromkeys(matches))
+
+    if len(unique_matches) == 1:
+        return unique_matches[0]
+
+    return "INVALID"
+
+
+def build_prompt(caption, annotation_mode):
+    if annotation_mode == "caption_only":
+        return f"""Classify the dominant emotion expressed by this meme caption.
+
+Use exactly one label:
+Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
+
+Guidelines:
+- Joy: funny, playful, amused, light-hearted, affectionate
+- Anger: clearly mad, blaming, hostile, outraged
+- Disgust: contempt, revulsion, strong rejection
+- Fear: anxious, threatened, scared, worried
+- Sadness: disappointed, heartbroken, regretful, hopeless, ruined
+- Surprise: shocked, confused, unexpected, amazed
+- Neutral: weak, descriptive, unclear, or no strong emotion
+
+Caption:
+{caption}
+
+Return only the label.
+
+Label:"""
+
+    if annotation_mode == "image_caption":
+        return f"""Classify the dominant emotion expressed by this meme.
+
+Use the caption as the main evidence.
+Use the image only to understand the meme context.
+
+Use exactly one label:
+Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
+
+Guidelines:
+- Joy: funny, playful, amused, light-hearted, affectionate
+- Anger: clearly mad, blaming, hostile, outraged
+- Disgust: contempt, revulsion, strong rejection
+- Fear: anxious, threatened, scared, worried
+- Sadness: disappointed, heartbroken, regretful, hopeless, ruined
+- Surprise: shocked, confused, unexpected, amazed
+- Neutral: weak, descriptive, unclear, or no strong emotion
+
+Caption:
+{caption}
+
+Return only the label.
+
+Label:"""
+
+    raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
+
+
+def build_retry_prompt(caption, annotation_mode):
+    if annotation_mode == "caption_only":
+        input_description = "caption"
+    elif annotation_mode == "image_caption":
+        input_description = "meme image and caption"
+    else:
+        raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
+
+    return f"""Classify the dominant intended emotion of the {input_description}.
+
+Use these rules:
+- Playful joke, absurd comparison, harmless irony, or self-deprecating humor -> Joy.
+- Strong hostility, blame, resentment, or outrage -> Anger.
+- Revulsion, contempt, or strong rejection -> Disgust.
+- Anxiety, threat, danger, or panic -> Fear.
+- Heartbreak, loss, disappointment, regret, or ruined situation -> Sadness.
+- Shock, disbelief, confusion, or unexpected twist -> Surprise.
+- Weak, descriptive, or unclear emotion -> Neutral.
+
+Caption:
+{caption}
+
+Allowed labels:
+Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise
+
+Return only one allowed label. No explanation.
+
+Label:"""
+
+
+def make_query(tokenizer, prompt_text, img_path, annotation_mode):
+    """
+    caption_only:
+        Send only text to Qwen.
+
+    image_caption:
+        Send image + text using Qwen-VL formatting.
+    """
+    if annotation_mode == "caption_only":
+        return prompt_text
+
+    if annotation_mode == "image_caption":
+        return tokenizer.from_list_format([
+            {"image": img_path},
+            {"text": prompt_text},
+        ])
+
+    raise ValueError(f"Unknown annotation_mode: {annotation_mode}")
+
+
+def run_qwen(model, tokenizer, query):
+    with torch.no_grad():
+        response, _ = model.chat(
+            tokenizer,
+            query=query,
+            history=None,
+        )
+    return response
+
+
+def compute_distribution(items, label_key):
+    counter = Counter(item.get(label_key, "MISSING") for item in items)
+    total = sum(counter.values())
+
+    valid_total = sum(counter[label] for label in VALID_CLASSES)
+    aux_or_missing_total = (
+        counter.get("INVALID", 0)
+        + counter.get("AMBIGUOUS", 0)
+        + counter.get("MISSING", 0)
+    )
+
+    all_label_distribution = {}
+    for label, count in counter.most_common():
+        all_label_distribution[label] = {
+            "count": count,
+            "percentage_among_all": round((count / total) * 100, 2) if total else 0.0,
+        }
+
+    valid_label_distribution = {}
+    for label in VALID_CLASSES:
+        count = counter.get(label, 0)
+        valid_label_distribution[label] = {
+            "count": count,
+            "percentage_among_valid": round((count / valid_total) * 100, 2) if valid_total else 0.0,
+            "percentage_among_all": round((count / total) * 100, 2) if total else 0.0,
+        }
+
+    aux_distribution = {}
+    for label in AUX_CLASSES + ["MISSING"]:
+        count = counter.get(label, 0)
+        aux_distribution[label] = {
+            "count": count,
+            "percentage_among_all": round((count / total) * 100, 2) if total else 0.0,
+        }
+
+    return {
+        "total_items": total,
+        "valid_labeled_items": valid_total,
+        "aux_or_missing_items": aux_or_missing_total,
+        "all_label_distribution": all_label_distribution,
+        "valid_label_distribution": valid_label_distribution,
+        "aux_distribution": aux_distribution,
+    }
+
+
+def stratified_sample(items, label_key, per_class=10, seed=42):
+    random.seed(seed)
+
+    by_label = defaultdict(list)
+    for item in items:
+        label = item.get(label_key, "MISSING")
+        by_label[label].append(item)
+
+    sampled = []
+
+    for label in VALID_CLASSES + AUX_CLASSES:
+        group = by_label.get(label, [])
+        if not group:
+            continue
+
+        k = min(per_class, len(group))
+        sampled.extend(random.sample(group, k))
+
+    return sampled
+
+
+def save_markdown_report(samples, image_root, output_path, label_key, raw_key, annotation_mode):
+    output_path = Path(output_path)
+    out_dir = output_path.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    sample_img_dir = out_dir / "sampled_images"
+    sample_img_dir.mkdir(parents=True, exist_ok=True)
+
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write("# Qwen-VL Manual Quality Check (Random Samples)\n\n")
+        f.write(f"# Qwen-VL Manual Quality Check - {annotation_mode}\n\n")
+        f.write("Use this file to inspect silver-label noise.\n\n")
+        f.write("Suggested manual fields:\n")
+        f.write("- Correct? yes/no/ambiguous\n")
+        f.write("- Human label\n")
+        f.write("- Notes\n\n")
+        f.write("---\n\n")
+
         for i, item in enumerate(samples):
             img_fname = item.get("img_fname", "")
-            meme_caps = item.get("meme_captions", [])
-            text = meme_caps[0] if isinstance(meme_caps, list) and len(meme_caps) > 0 else item.get("title", "")
-            
-            label = item.get("vlm_sentiment_label", "Unknown")
-            
-            src_img_path = os.path.join(image_root, img_fname)
-            dst_img_path = os.path.join(sample_img_dir, img_fname)
-            
-            if os.path.exists(src_img_path):
-                shutil.copy2(src_img_path, dst_img_path)
-            
-            md_img_path = f"sampled_images/{img_fname}"
-            
-            f.write(f"### {i+1}. Predicted Qwen Emotion: **{label}**\n")
-            f.write(f"- **Meme Text**: {text}\n\n")
-            f.write(f"<img src='{md_img_path}' width='400'>\n\n")
+            caption = get_meme_caption(item)
+            title = item.get("title", "")
+            label = item.get(label_key, "MISSING")
+            raw_response = item.get(raw_key, "")
+
+            src_img_path = Path(image_root) / img_fname
+            dst_img_path = sample_img_dir / img_fname
+
+            if img_fname and src_img_path.exists():
+                try:
+                    shutil.copy2(src_img_path, dst_img_path)
+                except Exception as e:
+                    print(f"Warning: could not copy image {src_img_path}: {e}")
+
+            f.write(f"## {i + 1}. Predicted label: **{label}**\n\n")
+
+            if title:
+                f.write(f"- **Title:** {title}\n")
+
+            if caption:
+                f.write(f"- **Meme caption:** {caption}\n")
+
+            f.write(f"- **Raw model response:** `{raw_response}`\n")
+            f.write("- **Manual judgment:** \n")
+            f.write("- **Human label if different:** \n")
+            f.write("- **Notes:** \n\n")
+
+            if img_fname:
+                md_img_path = f"sampled_images/{img_fname}"
+                f.write(f"<img src='{md_img_path}' width='400'>\n\n")
+
             f.write("---\n\n")
 
-def main(args):
-    valid_classes = ["Anger", "Disgust", "Fear", "Joy", "Neutral", "Sadness", "Surprise"]
-    
-    print(f"Loading VLM Model: {args.model_name} (This might take a while...)")
-    
-    quantization_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.float16
-    )
 
-    # Qwen-VL requires trust_remote_code=True
+def load_model_and_tokenizer(args):
+    print(f"Loading tokenizer: {args.model_name}")
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model_name, 
-        trust_remote_code=True
-    )
-    
-    # REMOVE the quantization_config completely.
-    # Load the model directly in bfloat16 and send it to CUDA.
-    
-    print(f"Loading VLM Model: {args.model_name} in bfloat16 (This might take a while...)")
-    
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.model_name, 
-        trust_remote_code=True
-    )
-    
-    model = AutoModelForCausalLM.from_pretrained(
         args.model_name,
         trust_remote_code=True,
-        torch_dtype=torch.bfloat16 # Load natively in bfloat16
-    ).cuda().eval() # Send to GPU and set to eval mode manually
+    )
 
-    model_slug = args.model_name.split("/")[-1].replace("-", "_")
-    output_base = Path(args.output_dir) / model_slug
-    output_base.mkdir(parents=True, exist_ok=True)
-    
-    all_processed_data = []
-    imbalance_report = {}
+    print(f"Loading model: {args.model_name}")
 
-    for split_name, input_path in [("test", args.test_input), ("train", args.train_input)]:
-        print(f"\nProcessing {split_name} split using {model_slug}...")
-        data = load_json(input_path)
-        
-        label_counter = Counter()
-        processed_data = []
+    if args.dtype == "bfloat16":
+        torch_dtype = torch.bfloat16
+    elif args.dtype == "float16":
+        torch_dtype = torch.float16
+    else:
+        raise ValueError(f"Unsupported dtype: {args.dtype}")
 
-        for item in tqdm(data):
-            meme_caps = item.get("meme_captions", [])
-            text = meme_caps[0] if isinstance(meme_caps, list) and len(meme_caps) > 0 else item.get("title", "")
-            img_fname = item.get("img_fname", "")
-            
-            if not text or not img_fname:
+    if args.device_map_auto:
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model_name,
+            trust_remote_code=True,
+            torch_dtype=torch_dtype,
+            device_map="auto",
+        ).eval()
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model_name,
+            trust_remote_code=True,
+            torch_dtype=torch_dtype,
+        ).cuda().eval()
+
+    return model, tokenizer
+
+
+def process_split(split_name, input_path, model, tokenizer, args, output_base):
+    print(f"\nProcessing {split_name} split with annotation_mode={args.annotation_mode}")
+
+    data = load_json(input_path)
+
+    label_key = f"qwen_{args.annotation_mode}_sentiment_label"
+    raw_key = f"qwen_{args.annotation_mode}_raw_response"
+
+    processed_data = []
+
+    skipped_missing_caption = 0
+    skipped_missing_image = 0
+    exception_count = 0
+    invalid_count = 0
+    ambiguous_count = 0
+
+    for item in tqdm(data, desc=f"{split_name} / {args.annotation_mode}"):
+        caption = get_meme_caption(item)
+
+        if not caption:
+            skipped_missing_caption += 1
+            continue
+
+        img_fname = item.get("img_fname", "")
+        img_path = os.path.join(args.image_root, img_fname) if img_fname else ""
+
+        if args.annotation_mode == "image_caption":
+            if not img_path or not os.path.exists(img_path):
+                skipped_missing_image += 1
                 continue
 
-            img_path = os.path.join(args.image_root, img_fname)
-            if not os.path.exists(img_path):
-                continue
+        raw_response = ""
+        final_label = "INVALID"
 
-            # We use the few-shot prompt that teaches the model about meme irony
-            prompt_text = (
-                f"You are an AI that classifies the true emotional intent of internet memes. "
-                f"Memes often use irony. Here are examples of how to classify them:\n\n"
-                f"Example 1:\n"
-                f"Caption: 'Me looking at my bank account after buying expensive coffee.'\n"
-                f"Image: A crying person.\n"
-                f"Intent: This is self-deprecating humor.\n"
-                f"Emotion: Joy\n\n"
-                f"Example 2:\n"
-                f"Caption: 'When the teacher assigns homework on Friday.'\n"
-                f"Image: A character smiling while everything is on fire.\n"
-                f"Intent: This expresses frustration and sarcasm.\n"
-                f"Emotion: Disgust\n\n"
-                f"Example 3:\n"
-                f"Caption: 'I actually failed my final exam today.'\n"
-                f"Image: A genuinely sad cat.\n"
-                f"Intent: This is literal and depressing.\n"
-                f"Emotion: Sadness\n\n"
-                f"Now, look at the provided meme image and read its caption: '{text}'. "
-                f"Classify its true intended emotion into EXACTLY ONE of these categories: "
-                f"Anger, Disgust, Fear, Joy, Neutral, Sadness, Surprise. "
-                f"Output ONLY the category name."
+        try:
+            prompt_text = build_prompt(
+                caption=caption,
+                annotation_mode=args.annotation_mode,
             )
 
-            # Qwen-VL specific formatting
-            query = tokenizer.from_list_format([
-                {'image': img_path},
-                {'text': prompt_text}
-            ])
+            query = make_query(
+                tokenizer=tokenizer,
+                prompt_text=prompt_text,
+                img_path=img_path,
+                annotation_mode=args.annotation_mode,
+            )
 
-            try:
-                with torch.no_grad():
-                    response, _ = model.chat(tokenizer, query=query, history=None)
-                
-                final_label = clean_vlm_output(response, valid_classes)
-            except Exception as e:
-                print(f"Error processing {img_fname}: {e}")
-                final_label = "Neutral"
+            raw_response = run_qwen(model, tokenizer, query)
+            final_label = clean_vlm_output(raw_response)
 
-            item["vlm_sentiment_label"] = final_label
-            processed_data.append(item)
-            all_processed_data.append(item)
-            label_counter[final_label] += 1
+            if final_label == "INVALID" and args.retry_invalid:
+                retry_prompt = build_retry_prompt(
+                    caption=caption,
+                    annotation_mode=args.annotation_mode,
+                )
 
-        out_name = f"{split_name}_qwen_labels.json"
-        save_json(processed_data, output_base / out_name)
-        
-        total = sum(label_counter.values())
-        dist = {lbl: {"count": cnt, "percentage": (cnt/total)*100} for lbl, cnt in label_counter.items()}
-        imbalance_report[split_name] = dist
+                retry_query = make_query(
+                    tokenizer=tokenizer,
+                    prompt_text=retry_prompt,
+                    img_path=img_path,
+                    annotation_mode=args.annotation_mode,
+                )
 
-    report_name = "qwen_imbalance_report.json"
-    save_json(imbalance_report, output_base / report_name)
-    
-    if len(all_processed_data) >= args.num_samples:
-        random.seed(42)
-        sampled_items = random.sample(all_processed_data, args.num_samples)
-        md_name = "manual_check.md"
-        save_markdown_report(sampled_items, args.image_root, output_base / md_name)
+                retry_response = run_qwen(model, tokenizer, retry_query)
+                retry_label = clean_vlm_output(retry_response)
 
-    print(f"\nGeneration complete for {model_slug}. Outputs saved to {output_base}")
+                item[f"qwen_{args.annotation_mode}_first_raw_response"] = raw_response
+                item[f"qwen_{args.annotation_mode}_retry_raw_response"] = retry_response
+
+                raw_response = retry_response
+                final_label = retry_label
+
+        except Exception as e:
+            exception_count += 1
+            raw_response = f"ERROR: {repr(e)}"
+            final_label = "INVALID"
+
+        if final_label == "INVALID":
+            invalid_count += 1
+        elif final_label == "AMBIGUOUS":
+            ambiguous_count += 1
+
+        item[label_key] = final_label
+        item[raw_key] = raw_response
+        item[f"qwen_{args.annotation_mode}_model"] = args.model_name
+        item[f"qwen_{args.annotation_mode}_annotation_mode"] = args.annotation_mode
+        item[f"qwen_{args.annotation_mode}_allow_ambiguous"] = args.allow_ambiguous
+
+        processed_data.append(item)
+
+    output_json = output_base / f"{split_name}_qwen_{args.annotation_mode}_labels.json"
+    save_json(processed_data, output_json)
+
+    report = compute_distribution(processed_data, label_key)
+    report["split"] = split_name
+    report["annotation_mode"] = args.annotation_mode
+    report["input_path"] = str(input_path)
+    report["model_name"] = args.model_name
+    report["skipped_missing_caption"] = skipped_missing_caption
+    report["skipped_missing_image"] = skipped_missing_image
+    report["exception_count"] = exception_count
+    report["invalid_count"] = invalid_count
+    report["ambiguous_count"] = ambiguous_count
+    report["allow_ambiguous"] = args.allow_ambiguous
+
+    report_json = output_base / f"{split_name}_qwen_{args.annotation_mode}_imbalance_report.json"
+    save_json(report, report_json)
+
+    print(f"Saved labels to: {output_json}")
+    print(f"Saved report to: {report_json}")
+    print(f"Valid labels: {report['valid_labeled_items']}")
+    print(f"Aux/missing labels: {report['aux_or_missing_items']}")
+    print(f"Invalid labels: {invalid_count}")
+    print(f"Ambiguous labels: {ambiguous_count}")
+
+    return processed_data, report
+
+
+def main(args):
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
+    model_slug = args.model_name.split("/")[-1].replace("-", "_")
+
+    if args.annotation_mode == "caption_only":
+        run_slug = f"{model_slug}_caption_only"
+    elif args.annotation_mode == "image_caption":
+        run_slug = f"{model_slug}_image_caption"
+    else:
+        raise ValueError(f"Unknown annotation_mode: {args.annotation_mode}")
+
+    if args.output_suffix:
+        run_slug = f"{run_slug}_{args.output_suffix}"
+
+    output_base = Path(args.output_dir) / run_slug
+    output_base.mkdir(parents=True, exist_ok=True)
+
+    save_json(vars(args), output_base / "generation_args.json")
+
+    model, tokenizer = load_model_and_tokenizer(args)
+
+    splits = []
+    if args.split in ["train", "both"]:
+        splits.append(("train", args.train_input))
+    if args.split in ["test", "both"]:
+        splits.append(("test", args.test_input))
+
+    all_processed_data = []
+    combined_report = {}
+
+    for split_name, input_path in splits:
+        processed_data, report = process_split(
+            split_name=split_name,
+            input_path=input_path,
+            model=model,
+            tokenizer=tokenizer,
+            args=args,
+            output_base=output_base,
+        )
+
+        all_processed_data.extend(processed_data)
+        combined_report[split_name] = report
+
+    combined_report_path = output_base / f"qwen_{args.annotation_mode}_combined_imbalance_report.json"
+    save_json(combined_report, combined_report_path)
+
+    label_key = f"qwen_{args.annotation_mode}_sentiment_label"
+    raw_key = f"qwen_{args.annotation_mode}_raw_response"
+
+    if args.manual_per_class > 0 and all_processed_data:
+        samples = stratified_sample(
+            all_processed_data,
+            label_key=label_key,
+            per_class=args.manual_per_class,
+            seed=args.seed,
+        )
+
+        manual_check_path = output_base / f"manual_check_{args.annotation_mode}_stratified.md"
+
+        save_markdown_report(
+            samples=samples,
+            image_root=args.image_root,
+            output_path=manual_check_path,
+            label_key=label_key,
+            raw_key=raw_key,
+            annotation_mode=args.annotation_mode,
+        )
+
+        print(f"Saved manual check to: {manual_check_path}")
+
+    print(f"\nGeneration complete. Outputs saved to: {output_base}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--train_input", type=str, default="data/memes-trainval.json")
-    parser.add_argument("--test_input", type=str, default="data/memes-test.json")
-    parser.add_argument("--output_dir", type=str, default="outputs/sentiment_classification/labels")
-    parser.add_argument("--image_root", type=str, default="data/memes")
-    parser.add_argument("--num_samples", type=int, default=20)
-    parser.add_argument("--model_name", type=str, default="Qwen/Qwen-VL-Chat")
+
+    parser.add_argument(
+        "--train_input",
+        type=str,
+        default="data/memes-trainval.json",
+        help="Path to MemeCap train/validation JSON.",
+    )
+
+    parser.add_argument(
+        "--test_input",
+        type=str,
+        default="data/memes-test.json",
+        help="Path to MemeCap test JSON.",
+    )
+
+    parser.add_argument(
+        "--image_root",
+        type=str,
+        default="data/memes",
+        help="Directory containing meme images.",
+    )
+
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="outputs/sentiment_classification/labels",
+        help="Base output directory.",
+    )
+
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        default="Qwen/Qwen-VL-Chat",
+        help="Qwen model name.",
+    )
+
+    parser.add_argument(
+        "--annotation_mode",
+        type=str,
+        choices=["caption_only", "image_caption"],
+        default="caption_only",
+        help=(
+            "caption_only uses only meme captions; "
+            "image_caption uses both meme image and meme caption."
+        ),
+    )
+
+    parser.add_argument(
+        "--split",
+        choices=["train", "test", "both"],
+        default="both",
+        help="Which split to process.",
+    )
+
+    parser.add_argument(
+        "--manual_per_class",
+        type=int,
+        default=10,
+        help="Number of examples per predicted class for manual-check markdown.",
+    )
+
+    parser.add_argument(
+        "--retry_invalid",
+        action="store_true",
+        help="Retry once with a stricter prompt if the first response is invalid.",
+    )
+
+    parser.add_argument(
+        "--allow_ambiguous",
+        action="store_true",
+        help=(
+            "Allow the model to return AMBIGUOUS for unclear samples. "
+            "Useful for cleaner silver labels, but you should exclude AMBIGUOUS from classifier training."
+        ),
+    )
+
+    parser.add_argument(
+        "--output_suffix",
+        type=str,
+        default="",
+        help=(
+            "Optional suffix for output folder. "
+            "Example: --output_suffix revised_prompt creates Qwen_VL_Chat_image_caption_revised_prompt."
+        ),
+    )
+
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed.",
+    )
+
+    parser.add_argument(
+        "--dtype",
+        choices=["bfloat16", "float16"],
+        default="bfloat16",
+        help="Model dtype.",
+    )
+
+    parser.add_argument(
+        "--device_map_auto",
+        action="store_true",
+        help="Use device_map='auto' instead of forcing .cuda().",
+    )
+
     args = parser.parse_args()
     main(args)

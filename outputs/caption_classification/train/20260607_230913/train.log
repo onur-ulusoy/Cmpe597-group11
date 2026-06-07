@@ -1,0 +1,107 @@
+Starting training at 20260607_230913
+Args: {'train_json': 'data/memes-trainval.json', 'test_json': 'data/memes-test.json', 'image_root': 'data/memes', 'output_dir': 'outputs/caption_classification/train', 'model_name': 'ViT-L-14', 'pretrained': 'laion2b_s32b_b82k', 'batch_size': 32, 'eval_batch_size': 64, 'epochs': 10, 'lr': 0.0001, 'weight_decay': 0.01, 'hidden_dim': 512, 'dropout': 0.3, 'limit': None, 'seed': 42, 'device': None, 'feature_dir': 'data/features/openclip_vit_l_14', 'val_ratio': 0.12}
+
+--- Epoch 1/10 ---
+Train Loss: 0.0587 | Val Loss: 0.0166
+Val tuned threshold: 0.1300
+Val accuracy: 0.9957
+Val precision: 0.9959
+Val recall: 0.9959
+Val f1: 0.9959
+Val roc_auc: 0.9999
+[*] Saved new best model by validation F1: 0.9959
+
+--- Epoch 2/10 ---
+Train Loss: 0.0106 | Val Loss: 0.0144
+Val tuned threshold: 0.5100
+Val accuracy: 0.9957
+Val precision: 1.0000
+Val recall: 0.9917
+Val f1: 0.9958
+Val roc_auc: 0.9999
+
+--- Epoch 3/10 ---
+Train Loss: 0.0048 | Val Loss: 0.0143
+Val tuned threshold: 0.0500
+Val accuracy: 0.9972
+Val precision: 0.9972
+Val recall: 0.9972
+Val f1: 0.9972
+Val roc_auc: 0.9999
+[*] Saved new best model by validation F1: 0.9972
+
+--- Epoch 4/10 ---
+Train Loss: 0.0019 | Val Loss: 0.0166
+Val tuned threshold: 0.0500
+Val accuracy: 0.9965
+Val precision: 0.9972
+Val recall: 0.9959
+Val f1: 0.9965
+Val roc_auc: 0.9999
+
+--- Epoch 5/10 ---
+Train Loss: 0.0015 | Val Loss: 0.0183
+Val tuned threshold: 0.0600
+Val accuracy: 0.9965
+Val precision: 0.9972
+Val recall: 0.9959
+Val f1: 0.9965
+Val roc_auc: 0.9999
+
+--- Epoch 6/10 ---
+Train Loss: 0.0006 | Val Loss: 0.0188
+Val tuned threshold: 0.0500
+Val accuracy: 0.9950
+Val precision: 0.9972
+Val recall: 0.9931
+Val f1: 0.9951
+Val roc_auc: 0.9999
+
+--- Epoch 7/10 ---
+Train Loss: 0.0004 | Val Loss: 0.0187
+Val tuned threshold: 0.0500
+Val accuracy: 0.9965
+Val precision: 0.9972
+Val recall: 0.9959
+Val f1: 0.9965
+Val roc_auc: 0.9999
+
+--- Epoch 8/10 ---
+Train Loss: 0.0003 | Val Loss: 0.0199
+Val tuned threshold: 0.0500
+Val accuracy: 0.9950
+Val precision: 0.9972
+Val recall: 0.9931
+Val f1: 0.9951
+Val roc_auc: 0.9999
+
+--- Epoch 9/10 ---
+Train Loss: 0.0002 | Val Loss: 0.0205
+Val tuned threshold: 0.0500
+Val accuracy: 0.9950
+Val precision: 0.9972
+Val recall: 0.9931
+Val f1: 0.9951
+Val roc_auc: 0.9999
+
+--- Epoch 10/10 ---
+Train Loss: 0.0002 | Val Loss: 0.0206
+Val tuned threshold: 0.0500
+Val accuracy: 0.9957
+Val precision: 0.9972
+Val recall: 0.9945
+Val f1: 0.9958
+Val roc_auc: 0.9999
+
+Best epoch: 3
+Best validation F1: 0.9972
+Best validation threshold: 0.0500
+
+[Final Test Metrics]
+Test Loss: 0.0654
+Threshold from validation: 0.0500
+Test accuracy: 0.9886
+Test precision: 0.9973
+Test recall: 0.9878
+Test f1: 0.9926
+Test roc_auc: 0.9995

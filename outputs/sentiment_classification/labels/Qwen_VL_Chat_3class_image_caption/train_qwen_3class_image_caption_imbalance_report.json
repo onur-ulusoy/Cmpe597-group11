@@ -1,0 +1,54 @@
+{
+    "total_items": 5823,
+    "valid_labeled_items": 5823,
+    "aux_or_missing_items": 0,
+    "all_label_distribution": {
+        "Positive": {
+            "count": 3516,
+            "percentage_among_all": 60.38
+        },
+        "Neutral": {
+            "count": 1372,
+            "percentage_among_all": 23.56
+        },
+        "Negative": {
+            "count": 935,
+            "percentage_among_all": 16.06
+        }
+    },
+    "valid_label_distribution": {
+        "Positive": {
+            "count": 3516,
+            "percentage_among_valid": 60.38,
+            "percentage_among_all": 60.38
+        },
+        "Negative": {
+            "count": 935,
+            "percentage_among_valid": 16.06,
+            "percentage_among_all": 16.06
+        },
+        "Neutral": {
+            "count": 1372,
+            "percentage_among_valid": 23.56,
+            "percentage_among_all": 23.56
+        }
+    },
+    "aux_distribution": {
+        "INVALID": {
+            "count": 0,
+            "percentage_among_all": 0.0
+        },
+        "MISSING": {
+            "count": 0,
+            "percentage_among_all": 0.0
+        }
+    },
+    "split": "train",
+    "annotation_mode": "image_caption",
+    "input_path": "data/memes-trainval.json",
+    "model_name": "Qwen/Qwen-VL-Chat",
+    "skipped_missing_caption": 0,
+    "skipped_missing_image": 0,
+    "exception_count": 0,
+    "invalid_count": 0
+}
