@@ -123,6 +123,21 @@ To improve upon the zero-shot baseline, we fine-tuned the **OpenCLIP (ViT-L/14)*
 **Model Selection (Type 1):**
 We saved LoRA adapters at each epoch and selected checkpoints using the held-out test evaluation script after training.. While the training loss continued to decrease, the retrieval performance peaked at **Epoch 7** (68.16% R@1) and subsequently degraded due to overfitting. We selected the **Epoch 7 checkpoint** for Type 1 evaluation.
 
+#### Additional CLIP Projection-Head Experiment
+
+To go beyond the required from-scratch custom model, we trained small projection heads on top of frozen OpenCLIP embeddings. This keeps the pretrained image-text representation fixed while learning a MemeCap-specific alignment layer.
+
+Visualizations:
+
+![Projection Loss](outputs/retrieval/clip_projection/type2_caption_hn_alpha/loss_curve.png)
+
+![Validation Recall](outputs/retrieval/clip_projection/type2_caption_hn_alpha/recall_curve.png)
+
+![Rank Histogram](outputs/retrieval/clip_projection/type2_caption_hn_alpha/rank_histogram.png)
+
+![Similarity Matrix](outputs/retrieval/clip_projection/type2_caption_hn_alpha/similarity_matrix_sample.png)
+
+![Alpha Sweep](outputs/retrieval/clip_projection/type2_caption_hn_alpha/alpha_sweep.png)
 ---
 
 #### Experiment 2: Multimodal Fusion Finetuning (Type 2)
