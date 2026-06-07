@@ -1,0 +1,100 @@
+{
+    "total_items": 5823,
+    "valid_labeled_items": 5822,
+    "aux_or_missing_items": 1,
+    "all_label_distribution": {
+        "Anger": {
+            "count": 1507,
+            "percentage_among_all": 25.88
+        },
+        "Fear": {
+            "count": 1160,
+            "percentage_among_all": 19.92
+        },
+        "Joy": {
+            "count": 1130,
+            "percentage_among_all": 19.41
+        },
+        "Surprise": {
+            "count": 803,
+            "percentage_among_all": 13.79
+        },
+        "Neutral": {
+            "count": 751,
+            "percentage_among_all": 12.9
+        },
+        "Disgust": {
+            "count": 304,
+            "percentage_among_all": 5.22
+        },
+        "Sadness": {
+            "count": 167,
+            "percentage_among_all": 2.87
+        },
+        "INVALID": {
+            "count": 1,
+            "percentage_among_all": 0.02
+        }
+    },
+    "valid_label_distribution": {
+        "Anger": {
+            "count": 1507,
+            "percentage_among_valid": 25.88,
+            "percentage_among_all": 25.88
+        },
+        "Disgust": {
+            "count": 304,
+            "percentage_among_valid": 5.22,
+            "percentage_among_all": 5.22
+        },
+        "Fear": {
+            "count": 1160,
+            "percentage_among_valid": 19.92,
+            "percentage_among_all": 19.92
+        },
+        "Joy": {
+            "count": 1130,
+            "percentage_among_valid": 19.41,
+            "percentage_among_all": 19.41
+        },
+        "Neutral": {
+            "count": 751,
+            "percentage_among_valid": 12.9,
+            "percentage_among_all": 12.9
+        },
+        "Sadness": {
+            "count": 167,
+            "percentage_among_valid": 2.87,
+            "percentage_among_all": 2.87
+        },
+        "Surprise": {
+            "count": 803,
+            "percentage_among_valid": 13.79,
+            "percentage_among_all": 13.79
+        }
+    },
+    "aux_distribution": {
+        "INVALID": {
+            "count": 1,
+            "percentage_among_all": 0.02
+        },
+        "AMBIGUOUS": {
+            "count": 0,
+            "percentage_among_all": 0.0
+        },
+        "MISSING": {
+            "count": 0,
+            "percentage_among_all": 0.0
+        }
+    },
+    "split": "train",
+    "annotation_mode": "caption_only",
+    "input_path": "data/memes-trainval.json",
+    "model_name": "Qwen/Qwen-VL-Chat",
+    "skipped_missing_caption": 0,
+    "skipped_missing_image": 0,
+    "exception_count": 0,
+    "invalid_count": 1,
+    "ambiguous_count": 0,
+    "allow_ambiguous": false
+}

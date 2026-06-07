@@ -1,0 +1,20 @@
+{
+    "train_labels": "outputs/sentiment_classification/labels/Qwen_VL_Chat_image_caption_simple_prompt/train_qwen_image_caption_labels.json",
+    "test_labels": "outputs/sentiment_classification/labels/Qwen_VL_Chat_image_caption_simple_prompt/test_qwen_image_caption_labels.json",
+    "image_root": "data/memes",
+    "label_key": "qwen_image_caption_sentiment_label",
+    "label_set": "7class",
+    "clip_model": "openai/clip-vit-large-patch14",
+    "output_dir": "outputs/sentiment_classification/unimodal_baselines_7class_image_caption",
+    "cache_name": "7class_image_caption",
+    "use_cache": true,
+    "epochs": 20,
+    "batch_size": 64,
+    "feature_batch_size": 64,
+    "hidden_dim": 256,
+    "dropout": 0.3,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "val_ratio": 0.15,
+    "seed": 42
+}
